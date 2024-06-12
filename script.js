@@ -13,7 +13,7 @@ function loadPlayer(url) {
     const playerDiv = document.getElementById('player');
     playerDiv.innerHTML = '';  // Clear any previous embed
 
-    const embedUrl = `https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&auto_play=false&buying=false&sharing=false&show_playcount=false&show_comments=false&show_artwork=false&color=%23ff00ff`;
+    const embedUrl = `https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&auto_play=false&buying=false&sharing=false&show_playcount=false&show_comments=false&show_artwork=false&color=%232850ac`;
     const iframe = document.createElement('iframe');
     iframe.width = '100%';
     iframe.height = '166';

@@ -20,7 +20,7 @@ body {
 button {
     padding: 10px 20px;
     border: none;
-    background-color: #ff5500;
+    background-color: #2850ac;
     color: white;
     font-size: 16px;
     border-radius: 4px;
@@ -65,7 +65,7 @@ button:hover {
     -moz-appearance: none;
     width: 20px;
     height: 20px;
-    background: #ff5500;
+    background: #2850ac;
     cursor: pointer;
     border-radius: 50%;
 }
@@ -73,7 +73,7 @@ button:hover {
 #volume-control::-moz-range-thumb {
     width: 20px;
     height: 20px;
-    background: #ff5500;
+    background: #2850ac;
     cursor: pointer;
     border-radius: 50%;
 }
@@ -84,7 +84,7 @@ button:hover {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(45deg, rgba(255, 0, 150, 0.5), rgba(0, 204, 255, 0.5));
+    background: linear-gradient(45deg, rgba(74, 34, 54, 0.5), rgba(94, 35, 172, 0.5));
     background-size: 400% 400%;
     z-index: -1;
     animation: gradientBackground 15s ease infinite;
