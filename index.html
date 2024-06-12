@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SoundCloud Audio Player</title>
+    <link href="style.css" type="text/css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <h1>SoundCloud Audio Player</h1>
+        <div id="player"></div>
+        <div class="controls">
+            <button id="prev-button">Previous</button>
+            <input type="range" id="volume-control" min="0" max="100" value="50">
+            <button id="next-button">Next</button>
+        </div>
+    </div>
+    <div id="background"></div>
+    <script src="https://w.soundcloud.com/player/api.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
