@@ -90,6 +90,13 @@ button:hover {
     animation: gradientBackground 15s ease infinite;
 }
 
+#song-title {
+    margin-top: 5px;
+    height: 50px;
+    width: 100%;
+    background-color: #ff3300;
+}
+
 @keyframes gradientBackground {
     0% {
         background-position: 0% 50%;

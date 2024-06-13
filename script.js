@@ -13,6 +13,7 @@ const soundcloudUrls = [
 
 let currentIndex = 0;
 let widget;
+let isFirstLoad = true;
 
 function loadPlayer(url) {
     const playerDiv = document.getElementById('player');
@@ -46,28 +47,24 @@ function loadPlayer(url) {
                 playNextSong();
             });
 
-            // Automatically play the song when ready
-            widget.play();
+            // Automatically play the song when ready, except for the first load
+            if (!isFirstLoad) {
+                widget.play();
+            }
         });
     };
 
-    fetchCoverArt(url);
+    updateSongIndex();
 }
 
-function fetchCoverArt(url) {
-    const apiUrl = `https://api.soundcloud.com/resolve?url=${encodeURIComponent(url)}&client_id=YOUR_SOUNDCLOUD_CLIENT_ID`;
-
-    fetch(apiUrl)
-        .then(response => response.json())
-        .then(data => {
-            const coverArtUrl = data.artwork_url.replace('-large', '-t500x500');
-            document.body.style.backgroundImage = `url(${coverArtUrl})`;
-        })
-        .catch(error => console.error('Error fetching cover art:', error));
+function updateSongIndex() {
+    const songIndexDiv = document.getElementById('song-index');
+    songIndexDiv.textContent = `Now playing: ${currentIndex + 1} / ${soundcloudUrls.length}`;
 }
 
 function playNextSong() {
     currentIndex = (currentIndex + 1) % soundcloudUrls.length;
+    isFirstLoad = false;  // Ensure subsequent songs autoplay
     loadPlayer(soundcloudUrls[currentIndex]);
 }
 
@@ -77,12 +74,13 @@ document.getElementById('next-button').addEventListener('click', function () {
 
 document.getElementById('prev-button').addEventListener('click', function () {
     currentIndex = (currentIndex - 1 + soundcloudUrls.length) % soundcloudUrls.length;
+    isFirstLoad = false;  // Ensure subsequent songs autoplay
     loadPlayer(soundcloudUrls[currentIndex]);
 });
 
 document.getElementById('volume-control').addEventListener('input', function (event) {
     if (widget) {
-        const volume = event.target.value / 100 * 2.5;
+        const volume = event.target.value / 100 * 3;
         widget.setVolume(volume);
 
         // Debug: Log the current volume to console
@@ -96,4 +94,6 @@ document.getElementById('volume-control').addEventListener('input', function (ev
 window.onload = function () {
     loadPlayer(soundcloudUrls[currentIndex]);
 };
+
+
 
