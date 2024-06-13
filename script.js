@@ -1,9 +1,14 @@
 const soundcloudUrls = [
-    'https://soundcloud.com/comanbr/purple-spring',
-    'https://soundcloud.com/telefon-tel-aviv/ttv',
+    'https://soundcloud.com/apparat/hailin-from-the-edge?in=apparat/sets/apparat-walls',
     'https://soundcloud.com/aku-en/akufen-jeep-sex',
-    'https://soundcloud.com/trommelmusic/bryz-same-road-tcares01',
-    'https://soundcloud.com/click-records-amsterdam/hrrsn-talul-new-home-dub-mix-preview-311016',
+    'https://soundcloud.com/verzila/premiere-ab-sides-020-kpx?in=sven-okpara/sets/rominimal',
+    'https://soundcloud.com/moderat-official/copy-copy-logic1000-big-ever',
+    'https://soundcloud.com/the-kingdom-behind-me/maya-jane-coles-what-they-say',
+    'https://soundcloud.com/farmatlab/ini-diver-original-mixfree-download?in=sven-okpara/sets/rominimal',
+    'https://soundcloud.com/modmotif/mft005-alixr-isolate-original-mixfree-download?in=modmotif/sets/modmotif-free-tunes',
+    'https://soundcloud.com/timehaschangedrec/metodi-hristov-misted?in=sven-okpara/sets/rominimal',
+    'https://soundcloud.com/mouse-on-mars/artificial-authentic',
+    'https://soundcloud.com/telefon-tel-aviv/sound-in-a-dark-room',
 ];
 
 let currentIndex = 0;
@@ -28,13 +33,21 @@ function loadPlayer(url) {
         widget.bind(SC.Widget.Events.READY, function () {
             // Set the initial volume
             const volumeControl = document.getElementById('volume-control');
-            const initialVolume = volumeControl.value / 100;
+            const initialVolume = 1; // Set initial volume to 100%
             widget.setVolume(initialVolume);
 
             // Debug: Log the initial volume to console
             widget.getVolume(function (volume) {
                 console.log('Initial volume:', volume);
             });
+
+            // Bind event listener for song finish to play next song
+            widget.bind(SC.Widget.Events.FINISH, function () {
+                playNextSong();
+            });
+
+            // Automatically play the song when ready
+            widget.play();
         });
     };
 
@@ -53,9 +66,13 @@ function fetchCoverArt(url) {
         .catch(error => console.error('Error fetching cover art:', error));
 }
 
-document.getElementById('next-button').addEventListener('click', function () {
+function playNextSong() {
     currentIndex = (currentIndex + 1) % soundcloudUrls.length;
     loadPlayer(soundcloudUrls[currentIndex]);
+}
+
+document.getElementById('next-button').addEventListener('click', function () {
+    playNextSong();
 });
 
 document.getElementById('prev-button').addEventListener('click', function () {
@@ -65,7 +82,7 @@ document.getElementById('prev-button').addEventListener('click', function () {
 
 document.getElementById('volume-control').addEventListener('input', function (event) {
     if (widget) {
-        const volume = event.target.value / 100;
+        const volume = event.target.value / 100 * 2.5;
         widget.setVolume(volume);
 
         // Debug: Log the current volume to console
@@ -79,7 +96,4 @@ document.getElementById('volume-control').addEventListener('input', function (ev
 window.onload = function () {
     loadPlayer(soundcloudUrls[currentIndex]);
 };
-
-
-
 
