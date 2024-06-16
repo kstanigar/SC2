@@ -16,11 +16,11 @@ let widget;
 let isFirstLoad = true;
 
 function loadPlayer(url) {
-    const playerDiv = document.getElementById('player');
+    var playerDiv = document.getElementById('player');
     playerDiv.innerHTML = '';  // Clear any previous embed
 
-    const embedUrl = `https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&auto_play=false&buying=false&sharing=false&show_playcount=false&show_comments=false&show_artwork=false&color=%232850ac`;
-    const iframe = document.createElement('iframe');
+    var embedUrl = 'https://w.soundcloud.com/player/?url=' + encodeURIComponent(url) + '&auto_play=false&buying=false&sharing=false&show_playcount=false&show_comments=false&show_artwork=false&color=%232850ac';
+    var iframe = document.createElement('iframe');
     iframe.width = '100%';
     iframe.height = '166';
     iframe.scrolling = 'no';
@@ -33,8 +33,8 @@ function loadPlayer(url) {
         widget = SC.Widget(iframe);
         widget.bind(SC.Widget.Events.READY, function () {
             // Set the initial volume
-            const volumeControl = document.getElementById('volume-control');
-            const initialVolume = 1; // Set initial volume to 100%
+            var volumeControl = document.getElementById('volume-control');
+            var initialVolume = 1; // Set initial volume to 100%
             widget.setVolume(initialVolume);
 
             // Debug: Log the initial volume to console
@@ -58,8 +58,8 @@ function loadPlayer(url) {
 }
 
 function updateSongIndex() {
-    const songIndexDiv = document.getElementById('song-index');
-    songIndexDiv.textContent = `Now playing: ${currentIndex + 1} / ${soundcloudUrls.length}`;
+    var songIndexDiv = document.getElementById('song-index');
+    songIndexDiv.textContent = 'Now playing: ' + (currentIndex + 1) + ' / ' + soundcloudUrls.length;
 }
 
 function playNextSong() {
@@ -80,7 +80,7 @@ document.getElementById('prev-button').addEventListener('click', function () {
 
 document.getElementById('volume-control').addEventListener('input', function (event) {
     if (widget) {
-        const volume = event.target.value / 100 * 3;
+        var volume = event.target.value / 100 * 3;
         widget.setVolume(volume);
 
         // Debug: Log the current volume to console
