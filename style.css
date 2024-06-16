@@ -62,7 +62,6 @@ button:hover {
 #volume-control::-webkit-slider-thumb {
     appearance: none;
     -webkit-appearance: none;
-    -moz-appearance: none;
     width: 20px;
     height: 20px;
     background: #2850ac;
@@ -95,6 +94,34 @@ button:hover {
     height: 50px;
     width: 100%;
     background-color: #ff3300;
+}
+
+@-webkit-keyframes gradientBackground {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@-moz-keyframes gradientBackground {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 @keyframes gradientBackground {
