@@ -17,6 +17,11 @@ body {
     z-index: 10;
 }
 
+#play-help {
+    color: #ff3300;
+    margin-bottom: 10px;
+}
+
 button {
     padding: 10px 20px;
     border: none;
