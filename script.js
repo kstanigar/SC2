@@ -1,11 +1,11 @@
 const soundcloudUrls = [
     'https://soundcloud.com/apparat/hailin-from-the-edge?in=apparat/sets/apparat-walls',
     'https://soundcloud.com/aku-en/akufen-jeep-sex',
-    'https://soundcloud.com/verzila/premiere-ab-sides-020-kpx?in=sven-okpara/sets/rominimal',
+    'https://soundcloud.com/meoko/premiere-joey-daniel-uninterrupted-sio',
     'https://soundcloud.com/moderat-official/copy-copy-logic1000-big-ever',
     'https://soundcloud.com/the-kingdom-behind-me/maya-jane-coles-what-they-say',
     'https://soundcloud.com/farmatlab/ini-diver-original-mixfree-download?in=sven-okpara/sets/rominimal',
-    'https://soundcloud.com/modmotif/mft005-alixr-isolate-original-mixfree-download?in=modmotif/sets/modmotif-free-tunes',
+    'https://soundcloud.com/user-800761345/morkz-afflicted-vr002',
     'https://soundcloud.com/timehaschangedrec/metodi-hristov-misted?in=sven-okpara/sets/rominimal',
     'https://soundcloud.com/mouse-on-mars/artificial-authentic',
     'https://soundcloud.com/telefon-tel-aviv/sound-in-a-dark-room',
