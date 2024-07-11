@@ -4,7 +4,7 @@ const soundcloudUrls = [
     'https://soundcloud.com/meoko/premiere-joey-daniel-uninterrupted-sio',
     'https://soundcloud.com/moderat-official/copy-copy-logic1000-big-ever',
     'https://soundcloud.com/the-kingdom-behind-me/maya-jane-coles-what-they-say',
-    'https://soundcloud.com/farmatlab/ini-diver-original-mixfree-download?in=sven-okpara/sets/rominimal',
+    'https://soundcloud.com/modmotif/mft003-queen-i-want-to-break-free-ansidis-get-loose-remix?in=modmotif/sets/modmotif-free-tunes',
     'https://soundcloud.com/user-800761345/morkz-afflicted-vr002',
     'https://soundcloud.com/timehaschangedrec/metodi-hristov-misted?in=sven-okpara/sets/rominimal',
     'https://soundcloud.com/mouse-on-mars/artificial-authentic',
