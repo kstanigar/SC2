@@ -1,19 +1,20 @@
 const soundcloudUrls = [
-    'https://soundcloud.com/apparat/hailin-from-the-edge?in=apparat/sets/apparat-walls',
-    'https://soundcloud.com/aku-en/akufen-jeep-sex',
-    'https://soundcloud.com/meoko/premiere-joey-daniel-uninterrupted-sio',
-    'https://soundcloud.com/moderat-official/copy-copy-logic1000-big-ever',
-    'https://soundcloud.com/the-kingdom-behind-me/maya-jane-coles-what-they-say',
-    'https://soundcloud.com/modmotif/mft003-queen-i-want-to-break-free-ansidis-get-loose-remix?in=modmotif/sets/modmotif-free-tunes',
-    'https://soundcloud.com/user-800761345/morkz-afflicted-vr002',
-    'https://soundcloud.com/timehaschangedrec/metodi-hristov-misted?in=sven-okpara/sets/rominimal',
-    'https://soundcloud.com/mouse-on-mars/artificial-authentic',
     'https://soundcloud.com/telefon-tel-aviv/sound-in-a-dark-room',
+    'https://soundcloud.com/alexisclau/jurgen-paape-and-boy-schaufler',
+    'https://soundcloud.com/user-424911266/dj-shadow-midnight-in-a-perfect-world-leygo-remix',
+    'https://soundcloud.com/aku-en/akufen-jeep-sex',
+    'https://soundcloud.com/ben-klock/ben-klock-subzero-original-mix',
+    'https://soundcloud.com/user-800761345/morkz-afflicted-vr002',
+    'https://soundcloud.com/rampa/xinobi-far-away-place-rampa-remix-discotexas-1',
+    'https://soundcloud.com/disciplesldn/they-dont-know',
+    'https://soundcloud.com/thisneverhappenedlabel/lane-8-little-voices',
+    'https://soundcloud.com/kitsunemusique/dj-conan-exclusive-mix-for-kitsune',
 ];
 
 let currentIndex = 0;
 let widget;
 let isFirstLoad = true;
+let currentVolume = 1 * 20;  // Default volume (100%)
 
 function loadPlayer(url) {
     var playerDiv = document.getElementById('player');
@@ -32,14 +33,12 @@ function loadPlayer(url) {
     iframe.onload = function () {
         widget = SC.Widget(iframe);
         widget.bind(SC.Widget.Events.READY, function () {
-            // Set the initial volume
-            var volumeControl = document.getElementById('volume-control');
-            var initialVolume = 1; // Set initial volume to 100%
-            widget.setVolume(initialVolume);
+            // Set the volume to the stored value
+            widget.setVolume(currentVolume);
 
             // Debug: Log the initial volume to console
             widget.getVolume(function (volume) {
-                console.log('Initial volume:', volume);
+                console.log('Volume after loading track:', volume);
             });
 
             // Bind event listener for song finish to play next song
@@ -63,16 +62,31 @@ function updateSongIndex() {
 }
 
 function playNextSong() {
+    // Store the current volume before switching to the next song
+    widget.getVolume(function (volume) {
+        currentVolume = volume;
+    });
+
     currentIndex = (currentIndex + 1) % soundcloudUrls.length;
     isFirstLoad = false;  // Ensure subsequent songs autoplay
     loadPlayer(soundcloudUrls[currentIndex]);
 }
 
 document.getElementById('next-button').addEventListener('click', function () {
+    // Store the current volume before switching
+    widget.getVolume(function (volume) {
+        currentVolume = volume;
+    });
+
     playNextSong();
 });
 
 document.getElementById('prev-button').addEventListener('click', function () {
+    // Store the current volume before switching
+    widget.getVolume(function (volume) {
+        currentVolume = volume;
+    });
+
     currentIndex = (currentIndex - 1 + soundcloudUrls.length) % soundcloudUrls.length;
     isFirstLoad = false;  // Ensure subsequent songs autoplay
     loadPlayer(soundcloudUrls[currentIndex]);
@@ -80,7 +94,8 @@ document.getElementById('prev-button').addEventListener('click', function () {
 
 document.getElementById('volume-control').addEventListener('input', function (event) {
     if (widget) {
-        var volume = event.target.value / 100 * 3;
+        var volume = event.target.value / 100 * 50;
+        currentVolume = volume;  // Store the new volume level
         widget.setVolume(volume);
 
         // Debug: Log the current volume to console
@@ -94,6 +109,7 @@ document.getElementById('volume-control').addEventListener('input', function (ev
 window.onload = function () {
     loadPlayer(soundcloudUrls[currentIndex]);
 };
+
 
 
 
