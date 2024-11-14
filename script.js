@@ -1,14 +1,14 @@
 const soundcloudUrls = [
-    'https://soundcloud.com/telefon-tel-aviv/sound-in-a-dark-room',
-    'https://soundcloud.com/alexisclau/jurgen-paape-and-boy-schaufler',
-    'https://soundcloud.com/user-424911266/dj-shadow-midnight-in-a-perfect-world-leygo-remix',
-    'https://soundcloud.com/aku-en/akufen-jeep-sex',
-    'https://soundcloud.com/ben-klock/ben-klock-subzero-original-mix',
-    'https://soundcloud.com/user-800761345/morkz-afflicted-vr002',
-    'https://soundcloud.com/rampa/xinobi-far-away-place-rampa-remix-discotexas-1',
-    'https://soundcloud.com/disciplesldn/they-dont-know',
+    'https://soundcloud.com/stimming/arc-de-triomphe',
+    'https://soundcloud.com/aku-en/akufen-installation?in=aku-en/sets/my-way-2002',
+    'https://soundcloud.com/four-tet/for-these-times',
+    'https://soundcloud.com/richiehawtin/f-u?in=robbie-jacobs-907573640/sets/ritchie-hawtin',
+    'https://soundcloud.com/flozbeats/overmono-everything-u-need-floz-edit',
+    'https://soundcloud.com/ellum/matteea-frames-1',
+    'https://soundcloud.com/maceoplex/mutant-romance-fakemaster1',
     'https://soundcloud.com/thisneverhappenedlabel/lane-8-little-voices',
-    'https://soundcloud.com/kitsunemusique/dj-conan-exclusive-mix-for-kitsune',
+    'https://soundcloud.com/disciplesldn/they-dont-know',
+    'https://soundcloud.com/telefon-tel-aviv/sound-in-a-dark-room',
 ];
 
 let currentIndex = 0;
