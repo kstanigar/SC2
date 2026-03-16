@@ -20,8 +20,8 @@ const musicLibrary = {
         'https://soundcloud.com/cafemusicbgmofficial/lets-start',
         'https://soundcloud.com/cafemusicbgmofficial/stylish-year',
         'https://soundcloud.com/cafemusicbgmofficial/o-come-all-ye-faithful-27',
-        'https://soundcloud.com/cafemusicbgmofficial/the-first-noel-22',
-        'https://soundcloud.com/cafemusicbgmofficial/joy-to-the-world-22',
+        'https://soundcloud.com/relaxcafemusic/early-summer',
+        'https://soundcloud.com/relaxcafemusic/cherry-on-top',
         'https://soundcloud.com/cafemusicbgmofficial/jingle-bells-21'
     ],
     rnb: [
@@ -33,10 +33,10 @@ const musicLibrary = {
         'https://soundcloud.com/dpwctqasgte6/b918fade-db3d-4f18-8fc5-be3c2181ad00'
     ],
     electronic: [
-        'https://soundcloud.com/stimming/arc-de-triomphe',
-        'https://soundcloud.com/aku-en/akufen-installation?in=aku-en/sets/my-way-2002',
-        'https://soundcloud.com/four-tet/for-these-times',
-        'https://soundcloud.com/richiehawtin/f-u?in=robbie-jacobs-907573640/sets/ritchie-hawtin',
+        'https://soundcloud.com/matador_official/matador-femme-just-getting-started',
+        'https://soundcloud.com/tinlicker/never-let-me-go-1',
+        'https://soundcloud.com/kompakt/raxon-never-stops-2',
+        'https://soundcloud.com/eynka/the-way',
         'https://soundcloud.com/flozbeats/overmono-everything-u-need-floz-edit',
         'https://soundcloud.com/ellum/matteea-frames-1',
         'https://soundcloud.com/maceoplex/mutant-romance-fakemaster1',
@@ -55,20 +55,21 @@ let currentVolume = 50;
 // Love Notes
 const loveNotes = [
     "Missing your smile right now... 💕",
-    "Every song reminds me of you",
-    "Can't wait to hold you again",
+    "Every wine glass reminds me of you",
+    "Where's my kiss?",
     "You're always on my mind",
     "Counting down the days until I see you",
     "Distance means so little when you mean so much",
     "This song is for you, my love",
-    "Thinking of all our beautiful moments together",
+    "Thinking of all our beautiful moments together, while going poo",
     "You make every day brighter, even from afar",
     "My heart is wherever you are",
     "Soon we'll be dancing together again",
     "Love you more than words can say",
-    "You're my favorite melody",
-    "Every beat of my heart sings your name",
-    "Until we're together again, you're in my thoughts"
+    "You're my favorite thing!",
+    "I love my baby, I love my babyyyyyyyyy. I love, I love, I love, I love, I love my baby! Hey!",
+    "Until we're together again, you're in my thoughts",
+    "Babydoll? Babyyyyy-doll?",
 ];
 
 // Countdown Configuration
@@ -126,10 +127,10 @@ function showLoveNote() {
     loveNoteDiv.textContent = randomNote;
     loveNoteDiv.classList.add('show');
 
-    // Hide after 8 seconds
+    // Hide after 2 minutes
     setTimeout(() => {
         loveNoteDiv.classList.remove('show');
-    }, 8000);
+    }, 120000);
 }
 
 /**
@@ -248,6 +249,12 @@ document.getElementById('volume-control').addEventListener('input', (e) => {
     }
 });
 
+// Clear cache function
+function clearCache() {
+    // Force hard reload to clear cached resources
+    window.location.reload(true);
+}
+
 // Initialize first song on window load
 window.onload = () => {
     loadPlayer();
@@ -256,6 +263,8 @@ window.onload = () => {
     setInterval(updateCountdown, 3600000);
     // Show initial love note after 5 seconds
     setTimeout(showLoveNote, 5000);
+    // Show love notes every 12 minutes (720000ms)
+    setInterval(showLoveNote, 720000);
 
     // Prevent double-tap zoom on iOS
     let lastTouchEnd = 0;
