@@ -59,11 +59,51 @@
 
         <p class="play-help">Tap "Listen in browser" if prompted</p>
 
-        <a href="simon.html" class="game-button">Play a Game 🎮</a>
+        <button class="game-button" onclick="openGame()">Play a Game 🎮</button>
+    </div>
+
+    <!-- Simon Says Game Modal -->
+    <div id="game-modal" class="game-modal">
+        <div class="game-modal-content">
+            <button class="close-game" onclick="closeGame()">✕</button>
+            <h1>Simon Says</h1>
+            <div class="score">
+                Score: <span id="game-score">0</span> | Best: <span id="game-best">0</span>
+            </div>
+
+            <div class="game-board">
+                <button class="color-btn" id="green" data-color="green"></button>
+                <button class="color-btn" id="red" data-color="red"></button>
+                <button class="color-btn" id="yellow" data-color="yellow"></button>
+                <button class="color-btn" id="blue" data-color="blue"></button>
+            </div>
+
+            <div class="game-controls">
+                <button class="game-btn" id="start-game-btn">Start Game</button>
+            </div>
+
+            <div class="game-message" id="game-message">Press Start to play!</div>
+
+            <!-- Music Controls in Game -->
+            <div class="game-music-controls">
+                <button class="music-control-btn" onclick="playPrevSong()">
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                        <path fill="currentColor" d="M6 6h2v12H6zm3.5 6l8.5 6V6z" />
+                    </svg>
+                </button>
+                <span class="now-playing">Music Playing</span>
+                <button class="music-control-btn" onclick="playNextSong()">
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                        <path fill="currentColor" d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
     </div>
 
     <script src="https://w.soundcloud.com/player/api.js"></script>
     <script src="script.js"></script>
+    <script src="simon.js"></script>
 </body>
 
 </html>

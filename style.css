@@ -313,6 +313,7 @@ h1 {
 
 .game-button {
     display: block;
+    width: 100%;
     margin-top: 20px;
     padding: 14px 24px;
     background: rgba(255, 255, 255, 0.15);
@@ -333,6 +334,206 @@ h1 {
 .game-button:active {
     transform: scale(0.95);
     background: rgba(255, 255, 255, 0.25);
+}
+
+/* Game Modal */
+.game-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    overflow-y: auto;
+}
+
+.game-modal.show {
+    display: flex;
+}
+
+.game-modal-content {
+    width: 92%;
+    max-width: 400px;
+    padding: 25px 20px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.95) 100%);
+    border-radius: 32px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    position: relative;
+    margin: 20px 0;
+}
+
+.close-game {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    touch-action: manipulation;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-game:active {
+    transform: scale(0.9);
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.game-modal-content h1 {
+    margin-top: 10px;
+}
+
+.score {
+    font-size: 1rem;
+    margin-bottom: 20px;
+    opacity: 0.9;
+}
+
+.game-board {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin: 30px 0;
+}
+
+.color-btn {
+    aspect-ratio: 1;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    position: relative;
+    min-height: 100px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.color-btn:active:not(.active) {
+    transform: scale(0.95);
+}
+
+.color-btn.active {
+    transform: scale(1.1);
+    box-shadow: 0 0 30px currentColor;
+}
+
+#green {
+    background: #4ade80;
+}
+
+#red {
+    background: #f87171;
+}
+
+#yellow {
+    background: #fbbf24;
+}
+
+#blue {
+    background: #60a5fa;
+}
+
+.game-controls {
+    margin-top: 20px;
+}
+
+.game-btn {
+    padding: 14px 28px;
+    margin: 5px;
+    min-height: 48px;
+    background: white;
+    color: #667eea;
+    border: none;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.game-btn:active {
+    transform: scale(0.95);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.game-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.game-message {
+    margin-top: 20px;
+    font-size: 0.95rem;
+    min-height: 30px;
+    font-style: italic;
+    opacity: 0.9;
+}
+
+.game-music-controls {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+.music-control-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: white;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    touch-action: manipulation;
+}
+
+.music-control-btn:active {
+    transform: scale(0.9);
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.now-playing {
+    font-size: 0.85rem;
+    opacity: 0.8;
+}
+
+@media (max-width: 600px) {
+    .game-board {
+        gap: 12px;
+    }
+
+    .color-btn {
+        min-height: 80px;
+    }
 }
 
 /* Ensure all buttons work well with touch */
