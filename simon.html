@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Simon Says - For Ellie</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.12);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        /* Allow text selection for game info */
+        .score,
+        .message {
+            -webkit-user-select: text;
+            user-select: text;
+        }
+
+        .container {
+            width: 92%;
+            max-width: 400px;
+            padding: 25px 20px;
+            padding-bottom: calc(25px + env(safe-area-inset-bottom));
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border);
+            border-radius: 32px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 300;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .score {
+            font-size: 1rem;
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .color-btn {
+            aspect-ratio: 1;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            min-height: 100px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .color-btn:active:not(.active) {
+            transform: scale(0.95);
+        }
+
+        .color-btn.active {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px currentColor;
+        }
+
+        #green {
+            background: #4ade80;
+        }
+
+        #red {
+            background: #f87171;
+        }
+
+        #yellow {
+            background: #fbbf24;
+        }
+
+        #blue {
+            background: #60a5fa;
+        }
+
+        .controls {
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            margin: 5px;
+            min-height: 48px;
+            background: white;
+            color: #667eea;
+            border: none;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .message {
+            margin-top: 20px;
+            font-size: 0.95rem;
+            min-height: 30px;
+            font-style: italic;
+            opacity: 0.9;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px;
+            color: white;
+            text-decoration: none;
+            font-size: 0.85rem;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .back-link:active {
+            opacity: 1;
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 600px) {
+            .game-board {
+                gap: 12px;
+            }
+
+            .color-btn {
+                min-height: 80px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Simon Says</h1>
+        <div class="score">
+            Score: <span id="score">0</span> | Best: <span id="best">0</span>
+        </div>
+
+        <div class="game-board">
+            <button class="color-btn" id="green" data-color="green"></button>
+            <button class="color-btn" id="red" data-color="red"></button>
+            <button class="color-btn" id="yellow" data-color="yellow"></button>
+            <button class="color-btn" id="blue" data-color="blue"></button>
+        </div>
+
+        <div class="controls">
+            <button class="btn" id="start-btn">Start Game</button>
+        </div>
+
+        <div class="message" id="message">Press Start to play!</div>
+
+        <a href="index.html" class="back-link">← Back to Music Player</a>
+    </div>
+
+    <script>
+        const colors = ['green', 'red', 'yellow', 'blue'];
+        let sequence = [];
+        let playerSequence = [];
+        let score = 0;
+        let bestScore = localStorage.getItem('simonBestScore') || 0;
+        let isPlaying = false;
+        let isPlayerTurn = false;
+
+        const scoreDisplay = document.getElementById('score');
+        const bestDisplay = document.getElementById('best');
+        const messageDisplay = document.getElementById('message');
+        const startBtn = document.getElementById('start-btn');
+        const colorBtns = document.querySelectorAll('.color-btn');
+
+        bestDisplay.textContent = bestScore;
+
+        // Start game
+        startBtn.addEventListener('click', startGame);
+
+        function startGame() {
+            sequence = [];
+            playerSequence = [];
+            score = 0;
+            isPlaying = true;
+            scoreDisplay.textContent = score;
+            messageDisplay.textContent = 'Watch the sequence...';
+            startBtn.disabled = true;
+            nextRound();
+        }
+
+        function nextRound() {
+            playerSequence = [];
+            isPlayerTurn = false;
+
+            // Add random color to sequence
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            sequence.push(randomColor);
+
+            // Play sequence
+            playSequence();
+        }
+
+        async function playSequence() {
+            for (let i = 0; i < sequence.length; i++) {
+                await sleep(600);
+                await flashColor(sequence[i]);
+            }
+            isPlayerTurn = true;
+            messageDisplay.textContent = 'Your turn!';
+        }
+
+        function flashColor(color) {
+            return new Promise(resolve => {
+                const btn = document.getElementById(color);
+                btn.classList.add('active');
+
+                setTimeout(() => {
+                    btn.classList.remove('active');
+                    resolve();
+                }, 400);
+            });
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // Handle player clicks and touches
+        colorBtns.forEach(btn => {
+            const handleInteraction = (e) => {
+                if (!isPlayerTurn || !isPlaying) return;
+
+                e.preventDefault(); // Prevent double-firing on mobile
+
+                const color = btn.dataset.color;
+                playerSequence.push(color);
+                flashColor(color);
+
+                checkSequence();
+            };
+
+            // Support both click and touch events
+            btn.addEventListener('click', handleInteraction);
+            btn.addEventListener('touchend', handleInteraction, { passive: false });
+        });
+
+        function checkSequence() {
+            const currentIndex = playerSequence.length - 1;
+
+            // Check if player's move matches the sequence
+            if (playerSequence[currentIndex] !== sequence[currentIndex]) {
+                gameOver();
+                return;
+            }
+
+            // If player completed the sequence
+            if (playerSequence.length === sequence.length) {
+                score++;
+                scoreDisplay.textContent = score;
+                isPlayerTurn = false;
+                messageDisplay.textContent = 'Correct! Watch next sequence...';
+
+                // Update best score
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestDisplay.textContent = bestScore;
+                    localStorage.setItem('simonBestScore', bestScore);
+                }
+
+                setTimeout(nextRound, 1500);
+            }
+        }
+
+        function gameOver() {
+            isPlaying = false;
+            isPlayerTurn = false;
+            messageDisplay.textContent = `Game Over! Final score: ${score}`;
+            startBtn.disabled = false;
+            startBtn.textContent = 'Play Again';
+        }
+
+        // Prevent double-tap zoom on iOS
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', (e) => {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, { passive: false });
+    </script>
+</body>
+
+</html>

@@ -1,166 +1,601 @@
+:root {
+    --glass-bg: rgba(255, 255, 255, 0.12);
+    --glass-border: rgba(255, 255, 255, 0.2);
+}
+
+* {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+}
+
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    /* Fix for mobile browser address bars */
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    margin: 0;
+    color: white;
     overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+    /* Remove the blue tap box on mobile */
+    -webkit-user-select: none;
+    user-select: none;
 }
 
-.container {
-    text-align: center;
-    background-color: rgba(255, 255, 255, 0.8);
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    z-index: 10;
-}
-
+/* Allow text selection for love notes and countdown */
+.love-note,
+.countdown,
 .play-help {
-    color: #ff3300;
-    margin-bottom: 15px;
+    -webkit-user-select: text;
+    user-select: text;
 }
 
-.block {
-    background-color: black;
-    color: white;
-    padding: 2px;
-}
-
-
-button {
-    padding: 10px 20px;
-    border: none;
-    background-color: #2850ac;
-    color: white;
-    font-size: 16px;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-button:hover {
-    background-color: #ff3300;
-}
-
-#player {
-    margin-top: 20px;
-}
-
-.controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 20px;
-}
-
-#volume-control {
-    width: 100px;
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    height: 10px;
-    background: #ddd;
-    border-radius: 5px;
-    outline: none;
-    opacity: 0.7;
-    transition: opacity 0.2s;
-}
-
-#volume-control:hover {
-    opacity: 1;
-}
-
-#volume-control::-webkit-slider-thumb {
-    appearance: none;
-    -webkit-appearance: none;
-    width: 20px;
-    height: 20px;
-    background: #2850ac;
-    cursor: pointer;
-    border-radius: 50%;
-}
-
-#volume-control::-moz-range-thumb {
-    width: 20px;
-    height: 20px;
-    background: #2850ac;
-    cursor: pointer;
-    border-radius: 50%;
-}
-
+/* Remove the existing static #background animation block and replace with this: */
 #background {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(10deg, rgba(0, 0, 0, 1), rgba(94, 35, 172, 1), rgb(0, 134, 25, 1), rgb(3, 15, 109, 1));
-    background-size: 400% 400%;
     z-index: -1;
-    animation: gradientBackground 15s ease infinite;
+    background-size: 400% 400%;
+    transition: background 1.5s ease;
+    /* Smooth transition when switching themes */
 }
 
-#song-title {
-    margin-top: 5px;
+/* Jazz Theme: Slow, warm, drifting */
+body.theme-jazz #background {
+    background: linear-gradient(45deg, #2c1e14, #4a3728, #6b4423, #3d2817, #1a1a1a);
+    animation: jazzDrift 15s ease-in-out infinite;
+}
+
+/* R&B Theme: Pulsing, deep purple/velvet */
+body.theme-rnb #background {
+    background: radial-gradient(ellipse at center, #4a0e5c, #2d0b3a, #1a0522, #000000);
+    animation: rnbPulse 6s ease-in-out infinite;
+}
+
+/* Electronic Theme: Fast, energetic, glitchy */
+body.theme-electronic #background {
+    background: linear-gradient(135deg, #000428, #004e92, #00d4ff, #7b2cbf, #000428);
+    animation: electronicShift 8s linear infinite;
+}
+
+/* Define the animations */
+@keyframes jazzDrift {
+    0% {
+        background-position: 0% 50%;
+        filter: brightness(0.9) saturate(1.1);
+    }
+    25% {
+        background-position: 100% 50%;
+        filter: brightness(1.0) saturate(1.2);
+    }
+    50% {
+        background-position: 50% 100%;
+        filter: brightness(0.95) saturate(1.15);
+    }
+    75% {
+        background-position: 0% 0%;
+        filter: brightness(1.05) saturate(1.1);
+    }
+    100% {
+        background-position: 0% 50%;
+        filter: brightness(0.9) saturate(1.1);
+    }
+}
+
+@keyframes rnbPulse {
+    0% {
+        background-position: 0% 50%;
+        filter: brightness(0.85) saturate(1.3);
+    }
+    33% {
+        background-position: 100% 50%;
+        filter: brightness(1.1) saturate(1.6);
+    }
+    66% {
+        background-position: 50% 100%;
+        filter: brightness(0.95) saturate(1.4);
+    }
+    100% {
+        background-position: 0% 50%;
+        filter: brightness(0.85) saturate(1.3);
+    }
+}
+
+@keyframes electronicShift {
+    0% {
+        background-position: 0% 50%;
+        filter: hue-rotate(0deg) brightness(1) saturate(1.2);
+    }
+    20% {
+        background-position: 50% 0%;
+        filter: hue-rotate(30deg) brightness(1.15) saturate(1.4);
+    }
+    40% {
+        background-position: 100% 50%;
+        filter: hue-rotate(60deg) brightness(0.95) saturate(1.3);
+    }
+    60% {
+        background-position: 50% 100%;
+        filter: hue-rotate(90deg) brightness(1.1) saturate(1.5);
+    }
+    80% {
+        background-position: 0% 50%;
+        filter: hue-rotate(120deg) brightness(1.05) saturate(1.3);
+    }
+    100% {
+        background-position: 0% 50%;
+        filter: hue-rotate(0deg) brightness(1) saturate(1.2);
+    }
+}
+
+
+.container {
+    width: 92%;
+    max-width: 400px;
+    /* Slimmer for mobile feel */
+    padding: 25px 20px;
+    padding-bottom: calc(25px + env(safe-area-inset-bottom));
+    margin-top: 10vh;
+    background: var(--glass-bg);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid var(--glass-border);
+    border-radius: 32px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    text-align: center;
+}
+
+h1 {
+    font-size: 1.5rem;
+    font-weight: 300;
+    margin-bottom: 15px;
+    letter-spacing: -0.5px;
+}
+
+.love-note {
+    margin: 0 0 20px 0;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    font-size: 0.9rem;
+    font-style: italic;
+    line-height: 1.5;
+    min-height: 50px;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.love-note.show {
+    opacity: 1;
+}
+
+.countdown {
+    font-size: 0.85rem;
+    font-weight: 300;
+    margin-top: 15px;
+    margin-bottom: 0;
+    opacity: 0.8;
+    font-style: italic;
+}
+
+.tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 25px;
+}
+
+.tab-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    color: white;
+    padding: 12px 5px;
+    /* Larger vertical padding for touch */
+    border-radius: 14px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.tab-btn.active {
+    background: white;
+    color: black;
+    border-color: white;
+}
+
+.player-card {
+    background: rgba(0, 0, 0, 0.15);
+    padding: 20px;
+    border-radius: 24px;
+}
+
+#player {
+    margin: 15px 0;
+    border-radius: 12px;
+    overflow: hidden;
+    height: 120px;
+    /* Shorter for mobile screens */
+}
+
+.controls {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.icon-btn {
+    background: white;
+    color: black;
+    border: none;
+    width: 50px;
     height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.icon-btn:active {
+    transform: scale(0.92);
+    /* Haptic feedback look */
+}
+
+.volume-container {
+    flex-grow: 1;
+    margin: 0 20px;
+}
+
+#volume-control {
     width: 100%;
-    background-color: #ff3300;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+    touch-action: none;
 }
 
-@-webkit-keyframes gradientBackground {
-    0% {
-        background-position: 0% 50%;
-    }
-
-    50% {
-        background-position: 100% 50%;
-    }
-
-    100% {
-        background-position: 0% 50%;
-    }
+#volume-control::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    background: white;
+    border-radius: 50%;
+    cursor: pointer;
+    touch-action: manipulation;
 }
 
-@-moz-keyframes gradientBackground {
-    0% {
-        background-position: 0% 50%;
-    }
-
-    50% {
-        background-position: 100% 50%;
-    }
-
-    100% {
-        background-position: 0% 50%;
-    }
+#volume-control::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    background: white;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
 }
 
-@keyframes gradientBackground {
-    0% {
-        background-position: 0% 50%;
-    }
-
-    50% {
-        background-position: 100% 50%;
-    }
-
-    100% {
-        background-position: 0% 50%;
-    }
-}
-
+/* Increase touch target for volume slider on mobile */
 @media (max-width: 600px) {
-    .container {
-        width: 90%;
-    }
-
     #volume-control {
-        width: 80px;
+        height: 8px;
     }
 
-    button {
-        font-size: 14px;
-        padding: 8px 16px;
+    #volume-control::-webkit-slider-thumb {
+        width: 24px;
+        height: 24px;
+    }
+
+    #volume-control::-moz-range-thumb {
+        width: 24px;
+        height: 24px;
+    }
+}
+
+.play-help {
+    font-size: 0.75rem;
+    margin-top: 20px;
+    opacity: 0.6;
+}
+
+.game-button {
+    display: block;
+    margin-top: 20px;
+    padding: 14px 24px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 20px;
+    color: white;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+}
+
+.game-button:active {
+    transform: scale(0.95);
+    background: rgba(255, 255, 255, 0.25);
+}
+
+/* Ensure all buttons work well with touch */
+.tab-btn,
+.icon-btn,
+.game-button {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.tab-btn:active {
+    transform: scale(0.95);
+}
+
+/* Improve touch target sizes for mobile */
+@media (max-width: 600px) {
+    .tab-btn {
+        min-height: 44px;
+    }
+
+    .icon-btn {
+        min-width: 50px;
+        min-height: 50px;
+    }
+
+    .game-button {
+        min-height: 48px;
+    }
+}
+
+/* Bubble/Drop Effects */
+.bubble {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0;
+}
+
+/* Jazz Theme: Gentle water drops */
+body.theme-jazz .bubble {
+    background: radial-gradient(circle at 30% 30%, rgba(255, 200, 150, 0.3), rgba(255, 220, 180, 0.1));
+    box-shadow: inset 0 0 10px rgba(255, 200, 150, 0.2);
+}
+
+body.theme-jazz .bubble:nth-child(1) {
+    width: 80px;
+    height: 80px;
+    left: 10%;
+    animation: dropJazz 12s ease-in-out infinite;
+}
+
+body.theme-jazz .bubble:nth-child(2) {
+    width: 60px;
+    height: 60px;
+    left: 70%;
+    animation: dropJazz 15s ease-in-out infinite 3s;
+}
+
+body.theme-jazz .bubble:nth-child(3) {
+    width: 50px;
+    height: 50px;
+    left: 40%;
+    animation: dropJazz 18s ease-in-out infinite 6s;
+}
+
+body.theme-jazz .bubble:nth-child(4) {
+    width: 70px;
+    height: 70px;
+    left: 85%;
+    animation: dropJazz 14s ease-in-out infinite 2s;
+}
+
+body.theme-jazz .bubble:nth-child(5) {
+    width: 55px;
+    height: 55px;
+    left: 25%;
+    animation: dropJazz 16s ease-in-out infinite 9s;
+}
+
+body.theme-jazz .bubble:nth-child(6) {
+    width: 65px;
+    height: 65px;
+    left: 55%;
+    animation: dropJazz 13s ease-in-out infinite 11s;
+}
+
+/* R&B Theme: Slow rising bubbles */
+body.theme-rnb .bubble {
+    background: radial-gradient(circle at 30% 30%, rgba(150, 50, 200, 0.4), rgba(100, 20, 150, 0.1));
+    box-shadow: inset 0 0 15px rgba(200, 100, 255, 0.3);
+}
+
+body.theme-rnb .bubble:nth-child(1) {
+    width: 100px;
+    height: 100px;
+    left: 20%;
+    animation: riseRnb 14s ease-in-out infinite;
+}
+
+body.theme-rnb .bubble:nth-child(2) {
+    width: 70px;
+    height: 70px;
+    left: 60%;
+    animation: riseRnb 16s ease-in-out infinite 4s;
+}
+
+body.theme-rnb .bubble:nth-child(3) {
+    width: 85px;
+    height: 85px;
+    left: 80%;
+    animation: riseRnb 12s ease-in-out infinite 7s;
+}
+
+body.theme-rnb .bubble:nth-child(4) {
+    width: 90px;
+    height: 90px;
+    left: 10%;
+    animation: riseRnb 15s ease-in-out infinite 2s;
+}
+
+body.theme-rnb .bubble:nth-child(5) {
+    width: 75px;
+    height: 75px;
+    left: 40%;
+    animation: riseRnb 13s ease-in-out infinite 10s;
+}
+
+body.theme-rnb .bubble:nth-child(6) {
+    width: 80px;
+    height: 80px;
+    left: 90%;
+    animation: riseRnb 17s ease-in-out infinite 5s;
+}
+
+/* Electronic Theme: Fast energetic bubbles */
+body.theme-electronic .bubble {
+    background: radial-gradient(circle at 30% 30%, rgba(0, 200, 255, 0.4), rgba(100, 150, 255, 0.1));
+    box-shadow: inset 0 0 20px rgba(0, 212, 255, 0.4);
+}
+
+body.theme-electronic .bubble:nth-child(1) {
+    width: 60px;
+    height: 60px;
+    left: 15%;
+    animation: bounceElectronic 6s ease-in-out infinite;
+}
+
+body.theme-electronic .bubble:nth-child(2) {
+    width: 50px;
+    height: 50px;
+    left: 50%;
+    animation: bounceElectronic 7s ease-in-out infinite 2s;
+}
+
+body.theme-electronic .bubble:nth-child(3) {
+    width: 70px;
+    height: 70px;
+    left: 75%;
+    animation: bounceElectronic 8s ease-in-out infinite 4s;
+}
+
+body.theme-electronic .bubble:nth-child(4) {
+    width: 55px;
+    height: 55px;
+    left: 30%;
+    animation: bounceElectronic 7s ease-in-out infinite 1s;
+}
+
+body.theme-electronic .bubble:nth-child(5) {
+    width: 65px;
+    height: 65px;
+    left: 60%;
+    animation: bounceElectronic 6s ease-in-out infinite 3s;
+}
+
+body.theme-electronic .bubble:nth-child(6) {
+    width: 60px;
+    height: 60px;
+    left: 90%;
+    animation: bounceElectronic 8s ease-in-out infinite 5s;
+}
+
+/* Bubble Animations */
+@keyframes dropJazz {
+    0% {
+        top: -100px;
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.6;
+    }
+    50% {
+        top: 50%;
+        opacity: 0.4;
+    }
+    90% {
+        opacity: 0.2;
+    }
+    100% {
+        top: 110%;
+        opacity: 0;
+    }
+}
+
+@keyframes riseRnb {
+    0% {
+        bottom: -100px;
+        opacity: 0;
+        transform: translateX(0);
+    }
+    10% {
+        opacity: 0.5;
+    }
+    50% {
+        bottom: 50%;
+        opacity: 0.4;
+        transform: translateX(20px);
+    }
+    90% {
+        opacity: 0.2;
+        transform: translateX(-10px);
+    }
+    100% {
+        bottom: 110%;
+        opacity: 0;
+        transform: translateX(0);
+    }
+}
+
+@keyframes bounceElectronic {
+    0% {
+        top: 110%;
+        opacity: 0;
+        transform: translateY(0);
+    }
+    10% {
+        opacity: 0.7;
+    }
+    25% {
+        top: 70%;
+        transform: translateY(-30px);
+    }
+    40% {
+        top: 60%;
+        transform: translateY(0);
+    }
+    50% {
+        top: 40%;
+        transform: translateY(-40px);
+    }
+    65% {
+        top: 30%;
+        transform: translateY(0);
+    }
+    80% {
+        top: 10%;
+        transform: translateY(-20px);
+        opacity: 0.5;
+    }
+    100% {
+        top: -10%;
+        opacity: 0;
+        transform: translateY(0);
     }
 }

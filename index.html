@@ -3,24 +3,65 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IDM</title>
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>For You</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
     <link href="style.css" type="text/css" rel="stylesheet">
 </head>
 
-<body>
-    <div class="container">
-        <h1>For My Love - Ellie</h1>
-        <div class="play-help">Click <span class="block">Listen in Browser</span> on Mobile Devices</div>
-        <div id="song-index"></div> <!-- Added for song index display -->
-        <div id="player"></div>
-        <div class="controls">
-            <button id="prev-button">Previous</button>
-            <input type="range" id="volume-control" min="0" max="100" value="50">
-            <button id="next-button">Next</button>
-        </div>
-    </div>
+<body class="theme-jazz">
     <div id="background"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+
+    <div class="container">
+        <header>
+            <h1>For Sweets!</h1>
+            <div id="love-note" class="love-note"></div>
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchGenre('lightJazz')">Jazz</button>
+                <button class="tab-btn" onclick="switchGenre('rnb')">R&B</button>
+                <button class="tab-btn" onclick="switchGenre('electronic')">EDM</button>
+            </div>
+        </header>
+
+        <div class="player-card">
+            <div id="song-index">Loading...</div>
+            <div id="player"></div>
+
+            <div class="controls">
+                <button id="prev-button" class="icon-btn">
+                    <svg viewBox="0 0 24 24" width="24" height="24">
+                        <path fill="currentColor" d="M6 6h2v12H6zm3.5 6l8.5 6V6z" />
+                    </svg>
+                </button>
+
+                <div class="volume-container">
+                    <input type="range" id="volume-control" min="0" max="100" value="50">
+                </div>
+
+                <button id="next-button" class="icon-btn">
+                    <svg viewBox="0 0 24 24" width="24" height="24">
+                        <path fill="currentColor" d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div id="countdown" class="countdown"></div>
+
+        <p class="play-help">Tap "Listen in browser" if prompted</p>
+
+        <a href="simon.html" class="game-button">Play a Game 🎮</a>
+    </div>
+
     <script src="https://w.soundcloud.com/player/api.js"></script>
     <script src="script.js"></script>
 </body>
