@@ -80,6 +80,9 @@ let widget;
 /** Flag to prevent autoplay on first load (browser restrictions) */
 let isFirstLoad = true;
 
+/** Tracks user's intended play/pause state */
+let shouldBePlaying = false;
+
 /** Current volume level (0-100) */
 let currentVolume = 50;
 
@@ -292,8 +295,14 @@ function loadPlayer() {
         widget = SC.Widget(iframe);
         widget.bind(SC.Widget.Events.READY, () => {
             widget.setVolume(currentVolume);
-            widget.bind(SC.Widget.Events.FINISH, () => playNextSong());
-            if (!isFirstLoad) {
+            widget.bind(SC.Widget.Events.FINISH, () => {
+                // Auto-advance to next track and keep playing
+                shouldBePlaying = true;
+                changeToNextTrack();
+            });
+
+            // Only autoplay if user wants music playing
+            if (shouldBePlaying && !isFirstLoad) {
                 // Small delay to ensure widget is fully ready
                 setTimeout(() => {
                     widget.play();
@@ -441,6 +450,7 @@ function switchGenre(genre) {
 
     // Genre switch is user interaction - enable autoplay
     isFirstLoad = false;
+    shouldBePlaying = true; // User wants to hear the new genre
 
     // Update Theme Class for CSS animations
     document.body.className = `theme-${genre === 'lightJazz' ? 'jazz' : genre}`;
@@ -491,6 +501,7 @@ function updateSongIndexUI() {
  * Wraps around to the beginning when reaching the end of the playlist.
  * Persists the new position and has a 30% chance to show a love note.
  * Includes debounce protection to prevent double-firing on mobile.
+ * Preserves the current play/pause state.
  */
 function playNextSong() {
     // Prevent double-firing from touchend + click events on mobile
@@ -500,8 +511,23 @@ function playNextSong() {
     }
     lastTrackChangeTime = now;
 
+    // Check current playing state before changing track
+    if (widget) {
+        widget.isPaused((paused) => {
+            shouldBePlaying = !paused;
+            changeToNextTrack();
+        });
+    } else {
+        changeToNextTrack();
+    }
+}
+
+/**
+ * Internal helper to change to next track
+ */
+function changeToNextTrack() {
     currentIndex = (currentIndex + 1) % musicLibrary[currentGenre].length;
-    saveGenrePosition(currentGenre, currentIndex); // Save new position
+    saveGenrePosition(currentGenre, currentIndex);
     isFirstLoad = false;
     loadPlayer();
     // Show love note occasionally (30% chance)
@@ -516,6 +542,7 @@ function playNextSong() {
  * Wraps around to the end when at the beginning of the playlist.
  * Persists the new position and has a 30% chance to show a love note.
  * Includes debounce protection to prevent double-firing on mobile.
+ * Preserves the current play/pause state.
  */
 function playPrevSong() {
     // Prevent double-firing from touchend + click events on mobile
@@ -525,8 +552,23 @@ function playPrevSong() {
     }
     lastTrackChangeTime = now;
 
+    // Check current playing state before changing track
+    if (widget) {
+        widget.isPaused((paused) => {
+            shouldBePlaying = !paused;
+            changeToPrevTrack();
+        });
+    } else {
+        changeToPrevTrack();
+    }
+}
+
+/**
+ * Internal helper to change to previous track
+ */
+function changeToPrevTrack() {
     currentIndex = (currentIndex - 1 + musicLibrary[currentGenre].length) % musicLibrary[currentGenre].length;
-    saveGenrePosition(currentGenre, currentIndex); // Save new position
+    saveGenrePosition(currentGenre, currentIndex);
     isFirstLoad = false;
     loadPlayer();
     // Show love note occasionally (30% chance)
@@ -641,7 +683,7 @@ function clearCache() {
  * Toggles playback state between play and pause
  *
  * Queries the SoundCloud widget for current state and toggles it,
- * then updates the UI icon to match.
+ * then updates the UI icon to match and tracks user's play intention.
  */
 function togglePlayPause() {
     if (!widget) return;
@@ -649,9 +691,11 @@ function togglePlayPause() {
     widget.isPaused((paused) => {
         if (paused) {
             widget.play();
+            shouldBePlaying = true;
             updatePlayPauseIcon(false);
         } else {
             widget.pause();
+            shouldBePlaying = false;
             updatePlayPauseIcon(true);
         }
     });
