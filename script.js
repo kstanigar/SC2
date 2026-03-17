@@ -83,8 +83,8 @@ let isFirstLoad = true;
 /** Current volume level (0-100) */
 let currentVolume = 50;
 
-/** Flag to prevent rapid track changes from double-firing events */
-let isChangingTrack = false;
+/** Timestamp of last track change to prevent event double-firing */
+let lastTrackChangeTime = 0;
 
 // Expose globally for cross-file access (simon.js)
 window.currentGenre = currentGenre;
@@ -494,8 +494,11 @@ function updateSongIndexUI() {
  */
 function playNextSong() {
     // Prevent double-firing from touchend + click events on mobile
-    if (isChangingTrack) return;
-    isChangingTrack = true;
+    const now = Date.now();
+    if (now - lastTrackChangeTime < 500) {
+        return;
+    }
+    lastTrackChangeTime = now;
 
     currentIndex = (currentIndex + 1) % musicLibrary[currentGenre].length;
     saveGenrePosition(currentGenre, currentIndex); // Save new position
@@ -505,11 +508,6 @@ function playNextSong() {
     if (Math.random() < 0.3) {
         showLoveNote();
     }
-
-    // Reset flag after a brief delay
-    setTimeout(() => {
-        isChangingTrack = false;
-    }, 300);
 }
 
 /**
@@ -521,8 +519,11 @@ function playNextSong() {
  */
 function playPrevSong() {
     // Prevent double-firing from touchend + click events on mobile
-    if (isChangingTrack) return;
-    isChangingTrack = true;
+    const now = Date.now();
+    if (now - lastTrackChangeTime < 500) {
+        return;
+    }
+    lastTrackChangeTime = now;
 
     currentIndex = (currentIndex - 1 + musicLibrary[currentGenre].length) % musicLibrary[currentGenre].length;
     saveGenrePosition(currentGenre, currentIndex); // Save new position
@@ -532,29 +533,22 @@ function playPrevSong() {
     if (Math.random() < 0.3) {
         showLoveNote();
     }
-
-    // Reset flag after a brief delay
-    setTimeout(() => {
-        isChangingTrack = false;
-    }, 300);
 }
 
 // Event Listeners
-// Next button - support both click and touch
+// Next button - using click event (works on both desktop and mobile)
 const nextBtn = document.getElementById('next-button');
-nextBtn.addEventListener('click', playNextSong);
-nextBtn.addEventListener('touchend', (e) => {
+nextBtn.addEventListener('click', (e) => {
     e.preventDefault();
     playNextSong();
-}, { passive: false });
+});
 
-// Previous button - support both click and touch
+// Previous button - using click event (works on both desktop and mobile)
 const prevBtn = document.getElementById('prev-button');
-prevBtn.addEventListener('click', playPrevSong);
-prevBtn.addEventListener('touchend', (e) => {
+prevBtn.addEventListener('click', (e) => {
     e.preventDefault();
     playPrevSong();
-}, { passive: false });
+});
 
 // ============================================================================
 // VOLUME CONTROL
