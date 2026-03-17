@@ -3,7 +3,7 @@
 ## Project Overview
 A mobile-first SoundCloud music player for Ellie with multi-genre playlists, animated backgrounds, love notes, countdown timer, and integrated Simon Says game.
 
-**Current Version:** v5.2.0
+**Current Version:** v5.2.1
 **Status:** Production-ready, fully functional
 
 ---
@@ -147,6 +147,37 @@ widget.bind(SC.Widget.Events.PAUSE, () => {
     updatePlayPauseIcon(true); // Show play icon (paused)
 });
 ```
+
+### v5.2.1 - Playlist Looping
+**Change:** Added automatic looping for next/previous buttons
+- When clicking next on the last track, loops back to first track
+- When clicking previous on the first track, loops back to last track
+- Uses `widget.getSounds()` to get playlist length
+- Uses `widget.getCurrentSoundIndex()` to check current position
+- Uses `widget.skip(index)` to jump to first/last track when looping
+
+**Implementation:**
+```javascript
+// Next button: Check if on last track
+widget.getSounds((sounds) => {
+    if (currentIndex >= sounds.length - 1) {
+        widget.skip(0); // Loop to first track
+    } else {
+        widget.next(); // Normal next
+    }
+});
+
+// Previous button: Check if on first track
+if (currentIndex <= 0) {
+    widget.getSounds((sounds) => {
+        widget.skip(sounds.length - 1); // Loop to last track
+    });
+} else {
+    widget.prev(); // Normal previous
+}
+```
+
+**Result:** Seamless playlist navigation with automatic looping at both ends
 
 ### v5.2.0 - Track Position Memory & Main Player Controls
 **Changes:**

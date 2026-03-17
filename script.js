@@ -14,7 +14,7 @@
  * - Glassmorphic design with animated backgrounds
  *
  * @author Keith Stanigar
- * @version 5.2.0
+ * @version 5.2.1
  */
 
 // ============================================================================
@@ -412,6 +412,7 @@ function updateSongIndexUI() {
  * Advances to the next track in the current genre playlist
  *
  * Uses SoundCloud widget's native next() method to navigate within the playlist.
+ * Loops back to the first track when reaching the end of the playlist.
  * Includes debounce protection to prevent double-firing on mobile.
  */
 function playNextSong() {
@@ -426,16 +427,28 @@ function playNextSong() {
 
     hasUserInteracted = true; // Mark user interaction
 
-    // Use widget's native next() method
-    widget.next();
-
-    // Update and save track position after short delay
-    setTimeout(() => {
-        widget.getCurrentSoundIndex((index) => {
-            currentTrackIndex = index;
-            saveTrackPosition(currentGenre, index);
+    // Check if we're on the last track to enable looping
+    widget.getSounds((sounds) => {
+        const totalTracks = sounds.length;
+        widget.getCurrentSoundIndex((currentIndex) => {
+            if (currentIndex >= totalTracks - 1) {
+                // We're on the last track, loop back to first
+                widget.skip(0);
+                currentTrackIndex = 0;
+                saveTrackPosition(currentGenre, 0);
+            } else {
+                // Normal next behavior
+                widget.next();
+                // Update and save track position after short delay
+                setTimeout(() => {
+                    widget.getCurrentSoundIndex((index) => {
+                        currentTrackIndex = index;
+                        saveTrackPosition(currentGenre, index);
+                    });
+                }, 500);
+            }
         });
-    }, 500);
+    });
 
     // Show love note occasionally (30% chance)
     if (Math.random() < 0.3) {
@@ -447,6 +460,7 @@ function playNextSong() {
  * Returns to the previous track in the current genre playlist
  *
  * Uses SoundCloud widget's native prev() method to navigate within the playlist.
+ * Loops back to the last track when going backwards from the first track.
  * Includes debounce protection to prevent double-firing on mobile.
  */
 function playPrevSong() {
@@ -461,16 +475,28 @@ function playPrevSong() {
 
     hasUserInteracted = true; // Mark user interaction
 
-    // Use widget's native prev() method
-    widget.prev();
-
-    // Update and save track position after short delay
-    setTimeout(() => {
-        widget.getCurrentSoundIndex((index) => {
-            currentTrackIndex = index;
-            saveTrackPosition(currentGenre, index);
-        });
-    }, 500);
+    // Check if we're on the first track to enable looping
+    widget.getCurrentSoundIndex((currentIndex) => {
+        if (currentIndex <= 0) {
+            // We're on the first track, loop back to last
+            widget.getSounds((sounds) => {
+                const lastIndex = sounds.length - 1;
+                widget.skip(lastIndex);
+                currentTrackIndex = lastIndex;
+                saveTrackPosition(currentGenre, lastIndex);
+            });
+        } else {
+            // Normal previous behavior
+            widget.prev();
+            // Update and save track position after short delay
+            setTimeout(() => {
+                widget.getCurrentSoundIndex((index) => {
+                    currentTrackIndex = index;
+                    saveTrackPosition(currentGenre, index);
+                });
+            }, 500);
+        }
+    });
 
     // Show love note occasionally (30% chance)
     if (Math.random() < 0.3) {
