@@ -1,7 +1,25 @@
 /**
- * FOR ELLIE - MUSIC PLAYER LOGIC
- * Features: Genre Tabs, Background Theme Management, Mobile Touch Support
+ * ============================================================================
+ * FOR ELLIE - SOUNDCLOUD MUSIC PLAYER
+ * ============================================================================
+ *
+ * A mobile-first music player with genre-specific playlists, animated
+ * backgrounds, love notes, countdown timer, and integrated Simon Says game.
+ *
+ * Key Features:
+ * - Multi-genre support with localStorage persistence
+ * - SoundCloud Widget API integration
+ * - Real-time UI synchronization across player and game modal
+ * - Touch-optimized controls for mobile devices
+ * - Glassmorphic design with animated backgrounds
+ *
+ * @author Keith Stanigar
+ * @version 3.0
  */
+
+// ============================================================================
+// DATA STRUCTURES
+// ============================================================================
 
 const musicLibrary = {
     lightJazz: [
@@ -46,11 +64,163 @@ const musicLibrary = {
     ]
 };
 
+// ============================================================================
+// STATE MANAGEMENT
+// ============================================================================
+
+/** Current active genre */
 let currentGenre = 'lightJazz';
+
+/** Current track index within the active genre */
 let currentIndex = 0;
+
+/** SoundCloud widget instance */
 let widget;
+
+/** Flag to prevent autoplay on first load (browser restrictions) */
 let isFirstLoad = true;
+
+/** Current volume level (0-100) */
 let currentVolume = 50;
+
+// Expose globally for cross-file access (simon.js)
+window.currentGenre = currentGenre;
+window.currentVolume = currentVolume;
+
+// ============================================================================
+// LOCALSTORAGE CONFIGURATION
+// ============================================================================
+// REUSABLE: These keys can be used in other projects for persistent storage
+
+/** Storage key for genre track positions */
+const STORAGE_KEY = 'musicPlayerGenrePositions';
+
+/** Storage key for volume preference */
+const VOLUME_STORAGE_KEY = 'musicPlayerVolume';
+
+/** Storage key for current genre selection */
+const GENRE_STORAGE_KEY = 'musicPlayerCurrentGenre';
+
+// ============================================================================
+// LOCALSTORAGE UTILITIES
+// ============================================================================
+// REUSABLE: These functions provide a safe localStorage interface with error
+// handling and default values. Can be adapted for any key-value persistence.
+
+/**
+ * Loads all saved genre positions from localStorage
+ *
+ * REUSABLE: Pattern for loading JSON objects from localStorage with fallback
+ *
+ * @returns {Object} Object mapping genre names to track indices
+ * @example
+ * { lightJazz: 5, rnb: 2, electronic: 7 }
+ */
+function loadGenrePositions() {
+    try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+            return JSON.parse(saved);
+        }
+    } catch (e) {
+        console.warn('Failed to load genre positions:', e);
+    }
+    // Default positions
+    return { lightJazz: 0, rnb: 0, electronic: 0 };
+}
+
+/**
+ * Saves the current track position for a specific genre
+ *
+ * REUSABLE: Pattern for updating nested localStorage objects
+ *
+ * @param {string} genre - Genre identifier (e.g., 'lightJazz', 'rnb')
+ * @param {number} index - Track index to save
+ */
+function saveGenrePosition(genre, index) {
+    try {
+        const positions = loadGenrePositions();
+        positions[genre] = index;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(positions));
+    } catch (e) {
+        console.warn('Failed to save genre position:', e);
+    }
+}
+
+/**
+ * Retrieves the saved track position for a specific genre
+ *
+ * @param {string} genre - Genre identifier
+ * @returns {number} Saved track index, or 0 if none found
+ */
+function getSavedPosition(genre) {
+    const positions = loadGenrePositions();
+    return positions[genre] || 0;
+}
+
+/**
+ * Persists volume level to localStorage
+ *
+ * REUSABLE: Simple value persistence pattern
+ *
+ * @param {number} volume - Volume level (0-100)
+ */
+function saveVolume(volume) {
+    try {
+        localStorage.setItem(VOLUME_STORAGE_KEY, volume);
+    } catch (e) {
+        console.warn('Failed to save volume:', e);
+    }
+}
+
+/**
+ * Retrieves saved volume level from localStorage
+ *
+ * REUSABLE: Pattern for loading numeric values with defaults
+ *
+ * @returns {number} Saved volume (0-100), defaults to 50
+ */
+function loadSavedVolume() {
+    try {
+        const saved = localStorage.getItem(VOLUME_STORAGE_KEY);
+        if (saved !== null) {
+            return parseInt(saved, 10);
+        }
+    } catch (e) {
+        console.warn('Failed to load volume:', e);
+    }
+    return 50; // Default volume
+}
+
+/**
+ * Saves the current active genre to localStorage
+ *
+ * @param {string} genre - Genre identifier to save
+ */
+function saveCurrentGenre(genre) {
+    try {
+        localStorage.setItem(GENRE_STORAGE_KEY, genre);
+    } catch (e) {
+        console.warn('Failed to save genre:', e);
+    }
+}
+
+/**
+ * Loads the last active genre from localStorage
+ *
+ * @returns {string} Saved genre identifier, defaults to 'lightJazz'
+ */
+function loadSavedGenre() {
+    try {
+        const saved = localStorage.getItem(GENRE_STORAGE_KEY);
+        if (saved && musicLibrary[saved]) {
+            return saved;
+        }
+    } catch (e) {
+        console.warn('Failed to load genre:', e);
+    }
+    return 'lightJazz'; // Default genre
+}
 
 // Love Notes
 const loveNotes = [
@@ -67,6 +237,7 @@ const loveNotes = [
     "Soon we'll be dancing together again",
     "Love you more than words can say",
     "You're my favorite thing!",
+    "I'm thinking of you right now",
     "I love my baby, I love my babyyyyyyyyy. I love, I love, I love, I love, I love my baby! Hey!",
     "Until we're together again, you're in my thoughts",
     "Babydoll? Babyyyyy-doll?",
@@ -75,8 +246,18 @@ const loveNotes = [
 // Countdown Configuration
 const returnDate = new Date('2026-04-30'); // Set your return date here
 
+// ============================================================================
+// SOUNDCLOUD PLAYER MANAGEMENT
+// ============================================================================
+
 /**
- * Initializes or updates the SoundCloud Widget
+ * Initializes or reloads the SoundCloud widget with current track
+ *
+ * Creates a new iframe embed for SoundCloud, configures the widget API,
+ * and sets up event handlers for playback control.
+ *
+ * @fires widget.bind - SC.Widget.Events.READY
+ * @fires widget.bind - SC.Widget.Events.FINISH
  */
 function loadPlayer() {
     const url = musicLibrary[currentGenre][currentIndex];
@@ -110,15 +291,34 @@ function loadPlayer() {
             widget.setVolume(currentVolume);
             widget.bind(SC.Widget.Events.FINISH, () => playNextSong());
             if (!isFirstLoad) {
-                widget.play();
+                // Small delay to ensure widget is fully ready
+                setTimeout(() => {
+                    widget.play();
+                    updatePlayPauseIcon(false); // Update icon to pause
+                }, 100);
+            } else {
+                updatePlayPauseIcon(true); // Update icon to play
             }
         });
     };
     updateSongIndexUI();
 }
 
+// ============================================================================
+// UI UPDATE FUNCTIONS
+// ============================================================================
+
 /**
- * Show random love note
+ * Displays a random love note message
+ *
+ * REUSABLE: Pattern for showing timed messages with fade in/out
+ *
+ * Selects a random message from the loveNotes array, displays it with
+ * a CSS transition, and automatically hides it after 2 minutes.
+ *
+ * @example
+ * // Trigger on user action or timer
+ * showLoveNote();
  */
 function showLoveNote() {
     const loveNoteDiv = document.getElementById('love-note');
@@ -134,7 +334,17 @@ function showLoveNote() {
 }
 
 /**
- * Update countdown timer
+ * Updates the countdown timer display
+ *
+ * REUSABLE: Pattern for calculating and displaying time differences
+ *
+ * Calculates the time difference between now and a target date,
+ * then displays it in a human-readable format (days/hours).
+ *
+ * @example
+ * // Set target date and call periodically
+ * const returnDate = new Date('2026-04-30');
+ * setInterval(updateCountdown, 3600000); // Every hour
  */
 function updateCountdown() {
     const countdownDiv = document.getElementById('countdown');
@@ -158,19 +368,81 @@ function updateCountdown() {
 }
 
 /**
- * Handles Tab Switching Logic
+ * Updates the clock display in both player and game
+ *
+ * REUSABLE: Pattern for formatting and displaying current time
+ *
+ * Formats the current time in 12-hour format with date (e.g., "Mar 16, 2:45 PM")
+ * and updates all clock elements in the DOM.
+ *
+ * @example
+ * // Initialize and update every minute
+ * updateClock();
+ * setInterval(updateClock, 60000);
+ */
+function updateClock() {
+    const now = new Date();
+
+    // Format date: "Mar 16"
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const month = months[now.getMonth()];
+    const day = now.getDate();
+
+    // Format time: "2:45 PM"
+    let hours = now.getHours();
+    const minutes = now.getMinutes();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // 0 should be 12
+    const minutesStr = minutes < 10 ? '0' + minutes : minutes;
+
+    const timeStr = `${month} ${day}, ${hours}:${minutesStr} ${ampm}`;
+
+    // Update both clocks
+    const playerClock = document.getElementById('player-clock');
+    const gameClock = document.getElementById('game-clock');
+
+    if (playerClock) playerClock.textContent = timeStr;
+    if (gameClock) gameClock.textContent = timeStr;
+}
+
+// ============================================================================
+// PLAYBACK CONTROL FUNCTIONS
+// ============================================================================
+
+/**
+ * Switches the active music genre and updates all UI elements
+ *
+ * This function orchestrates genre switching by:
+ * - Saving current track position
+ * - Loading saved position for new genre
+ * - Updating theme/background animations
+ * - Syncing tab buttons in both player and game
+ * - Triggering autoplay
+ * - Displaying a love note
+ *
+ * @param {string} genre - Genre identifier ('lightJazz', 'rnb', 'electronic')
  */
 function switchGenre(genre) {
     if (currentGenre === genre) return;
 
+    // Save current position before switching
+    saveGenrePosition(currentGenre, currentIndex);
+
     currentGenre = genre;
-    currentIndex = 0;
-    isFirstLoad = false; // User initiated a click, so we can now autoplay
+    window.currentGenre = genre; // Update global reference
+    saveCurrentGenre(genre); // Save to localStorage
+
+    // Load saved position for the new genre
+    currentIndex = getSavedPosition(genre);
+
+    // Genre switch is user interaction - enable autoplay
+    isFirstLoad = false;
 
     // Update Theme Class for CSS animations
     document.body.className = `theme-${genre === 'lightJazz' ? 'jazz' : genre}`;
 
-    // Update Button Active States
+    // Update Button Active States (main player)
     document.querySelectorAll('.tab-btn').forEach(btn => {
         const text = btn.textContent.toLowerCase();
         // Matching logic for Jazz/Light Jazz, R&B, and EDM labels
@@ -180,12 +452,21 @@ function switchGenre(genre) {
         btn.classList.toggle('active', isActive);
     });
 
+    // Update game genre tabs if they exist
+    document.querySelectorAll('.game-genre-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.genre === genre);
+    });
+
     loadPlayer();
     showLoveNote(); // Show love note when switching genres
 }
 
 /**
- * Updates the text counter (e.g., "Jazz | Track 1 of 18")
+ * Updates the song index display (e.g., "Jazz | Track 1 of 18")
+ *
+ * @example
+ * // Called after loadPlayer() to show current position
+ * updateSongIndexUI(); // "R&B | Track 3 of 6"
  */
 function updateSongIndexUI() {
     const songIndexDiv = document.getElementById('song-index');
@@ -202,10 +483,14 @@ function updateSongIndexUI() {
 }
 
 /**
- * Track Navigation
+ * Advances to the next track in the current genre playlist
+ *
+ * Wraps around to the beginning when reaching the end of the playlist.
+ * Persists the new position and has a 30% chance to show a love note.
  */
 function playNextSong() {
     currentIndex = (currentIndex + 1) % musicLibrary[currentGenre].length;
+    saveGenrePosition(currentGenre, currentIndex); // Save new position
     isFirstLoad = false;
     loadPlayer();
     // Show love note occasionally (30% chance)
@@ -214,8 +499,15 @@ function playNextSong() {
     }
 }
 
+/**
+ * Returns to the previous track in the current genre playlist
+ *
+ * Wraps around to the end when at the beginning of the playlist.
+ * Persists the new position and has a 30% chance to show a love note.
+ */
 function playPrevSong() {
     currentIndex = (currentIndex - 1 + musicLibrary[currentGenre].length) % musicLibrary[currentGenre].length;
+    saveGenrePosition(currentGenre, currentIndex); // Save new position
     isFirstLoad = false;
     loadPlayer();
     // Show love note occasionally (30% chance)
@@ -241,26 +533,209 @@ prevBtn.addEventListener('touchend', (e) => {
     playPrevSong();
 }, { passive: false });
 
-// Volume Slider with immediate feedback
-document.getElementById('volume-control').addEventListener('input', (e) => {
-    currentVolume = e.target.value;
-    if (widget) {
+// ============================================================================
+// VOLUME CONTROL
+// ============================================================================
+// REUSABLE: Pattern for syncing multiple UI controls to single state
+
+const volumeControl = document.getElementById('volume-control');
+
+/**
+ * Updates volume across all interfaces and persists to storage
+ *
+ * REUSABLE: Pattern for synchronized state management across multiple UI elements
+ *
+ * This function demonstrates how to keep multiple UI controls (main player
+ * slider and game slider) in sync with a single source of truth.
+ *
+ * @param {string|number} value - Volume level (0-100)
+ *
+ * @example
+ * // Called from any volume slider
+ * updateVolume(75); // Updates widget, both sliders, and localStorage
+ */
+function updateVolume(value) {
+    currentVolume = value;
+    window.currentVolume = value; // Update global reference
+    if (widget && widget.setVolume) {
         widget.setVolume(currentVolume);
+    }
+    saveVolume(currentVolume); // Save to localStorage
+
+    // Sync both volume sliders
+    const mainVolumeControl = document.getElementById('volume-control');
+    const gameVolumeControl = document.getElementById('game-volume-control');
+
+    if (mainVolumeControl) mainVolumeControl.value = currentVolume;
+    if (gameVolumeControl) gameVolumeControl.value = currentVolume;
+}
+
+// Handle both input and change events for better mobile support
+volumeControl.addEventListener('input', (e) => {
+    updateVolume(e.target.value);
+});
+
+volumeControl.addEventListener('change', (e) => {
+    updateVolume(e.target.value);
+});
+
+// Handle touch events specifically for mobile
+volumeControl.addEventListener('touchend', (e) => {
+    updateVolume(e.target.value);
+}, { passive: true });
+
+// Game volume control - initialize after DOM loads
+window.addEventListener('DOMContentLoaded', () => {
+    const gameVolumeControl = document.getElementById('game-volume-control');
+    if (gameVolumeControl) {
+        // Set initial value
+        gameVolumeControl.value = currentVolume;
+
+        // Handle events
+        gameVolumeControl.addEventListener('input', (e) => {
+            updateVolume(e.target.value);
+        });
+
+        gameVolumeControl.addEventListener('change', (e) => {
+            updateVolume(e.target.value);
+        });
+
+        gameVolumeControl.addEventListener('touchend', (e) => {
+            updateVolume(e.target.value);
+        }, { passive: true });
     }
 });
 
-// Clear cache function
+// ============================================================================
+// UTILITY FUNCTIONS
+// ============================================================================
+
+/**
+ * Forces a hard page reload to clear all cached resources
+ *
+ * Useful for troubleshooting when cached CSS/JS files cause issues.
+ */
 function clearCache() {
     // Force hard reload to clear cached resources
     window.location.reload(true);
 }
 
-// Initialize first song on window load
+/**
+ * Toggles playback state between play and pause
+ *
+ * Queries the SoundCloud widget for current state and toggles it,
+ * then updates the UI icon to match.
+ */
+function togglePlayPause() {
+    if (!widget) return;
+
+    widget.isPaused((paused) => {
+        if (paused) {
+            widget.play();
+            updatePlayPauseIcon(false);
+        } else {
+            widget.pause();
+            updatePlayPauseIcon(true);
+        }
+    });
+}
+
+/**
+ * Updates the play/pause button icon based on playback state
+ *
+ * REUSABLE: Pattern for toggling between two UI states
+ *
+ * @param {boolean} isPaused - True if player is paused, false if playing
+ */
+function updatePlayPauseIcon(isPaused) {
+    const playIcon = document.getElementById('play-icon');
+    const pauseIcon = document.getElementById('pause-icon');
+
+    if (playIcon && pauseIcon) {
+        if (isPaused) {
+            playIcon.style.display = 'block';
+            pauseIcon.style.display = 'none';
+        } else {
+            playIcon.style.display = 'none';
+            pauseIcon.style.display = 'block';
+        }
+    }
+}
+
+/**
+ * Switches genre from the game modal interface
+ *
+ * Updates the game's genre tab UI, then delegates to the main
+ * switchGenre function for actual genre switching logic.
+ *
+ * @param {string} genre - Genre identifier to switch to
+ */
+function switchGenreFromGame(genre) {
+    // Update game genre tabs
+    document.querySelectorAll('.game-genre-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.genre === genre);
+    });
+
+    // Call main genre switch function
+    switchGenre(genre);
+}
+
+// ============================================================================
+// INITIALIZATION
+// ============================================================================
+
+/**
+ * Application initialization on page load
+ *
+ * This function sets up the complete application state by:
+ * 1. Loading saved preferences from localStorage
+ * 2. Initializing UI elements with saved values
+ * 3. Setting up recurring timers for countdown and clock
+ * 4. Configuring mobile touch optimizations
+ * 5. Scheduling periodic love notes
+ *
+ * @listens window#load
+ */
 window.onload = () => {
+    // Load saved genre
+    currentGenre = loadSavedGenre();
+    window.currentGenre = currentGenre;
+
+    // Load saved position for the current genre
+    currentIndex = getSavedPosition(currentGenre);
+
+    // Load saved volume
+    currentVolume = loadSavedVolume();
+    window.currentVolume = currentVolume; // Update global reference
+    const volumeControl = document.getElementById('volume-control');
+    if (volumeControl) {
+        volumeControl.value = currentVolume;
+    }
+
+    // Update theme based on saved genre
+    document.body.className = `theme-${currentGenre === 'lightJazz' ? 'jazz' : currentGenre}`;
+
+    // Update active tab button (main player)
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        const text = btn.textContent.toLowerCase();
+        const isActive = (currentGenre === 'lightJazz' && text.includes('jazz')) ||
+            (currentGenre === 'rnb' && text.includes('r&b')) ||
+            (currentGenre === 'electronic' && text.includes('edm'));
+        btn.classList.toggle('active', isActive);
+    });
+
+    // Update game genre tabs
+    document.querySelectorAll('.game-genre-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.genre === currentGenre);
+    });
+
     loadPlayer();
     updateCountdown();
+    updateClock();
     // Update countdown every hour
     setInterval(updateCountdown, 3600000);
+    // Update clock every minute
+    setInterval(updateClock, 60000);
     // Show initial love note after 5 seconds
     setTimeout(showLoveNote, 5000);
     // Show love notes every 12 minutes (720000ms)

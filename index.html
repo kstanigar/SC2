@@ -3,17 +3,24 @@
 
 <head>
     <meta charset="UTF-8">
+    <!-- Mobile viewport optimization -->
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <!-- iOS web app configuration -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>For You</title>
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
     <link href="style.css" type="text/css" rel="stylesheet">
 </head>
 
 <body class="theme-jazz">
+    <!-- ==============================================================
+         BACKGROUND & BUBBLE EFFECTS
+         ============================================================== -->
     <div id="background"></div>
+    <!-- 6 animated bubbles with staggered timing -->
     <div class="bubble"></div>
     <div class="bubble"></div>
     <div class="bubble"></div>
@@ -21,7 +28,13 @@
     <div class="bubble"></div>
     <div class="bubble"></div>
 
+    <!-- ==============================================================
+         MAIN MUSIC PLAYER
+         ============================================================== -->
     <div class="container">
+        <!-- Date/Time Display -->
+        <div class="clock" id="player-clock"></div>
+
         <header>
             <h1>For Sweets!</h1>
             <div id="love-note" class="love-note"></div>
@@ -64,9 +77,13 @@
         <button class="clear-cache-btn" onclick="clearCache()">Clear Cache</button>
     </div>
 
-    <!-- Simon Says Game Modal -->
+    <!-- ==============================================================
+         SIMON SAYS GAME MODAL
+         Glassmorphic overlay with integrated music controls
+         ============================================================== -->
     <div id="game-modal" class="game-modal">
         <div class="game-modal-content">
+            <div class="clock" id="game-clock"></div>
             <button class="close-game" onclick="closeGame()">✕</button>
             <h1>Simon Says</h1>
             <div class="score">
@@ -86,6 +103,13 @@
 
             <div class="game-message" id="game-message">Press Start to play!</div>
 
+            <!-- Genre Selection in Game -->
+            <div class="game-genre-tabs">
+                <button class="game-genre-btn active" data-genre="lightJazz" onclick="switchGenreFromGame('lightJazz')">Jazz</button>
+                <button class="game-genre-btn" data-genre="rnb" onclick="switchGenreFromGame('rnb')">R&B</button>
+                <button class="game-genre-btn" data-genre="electronic" onclick="switchGenreFromGame('electronic')">EDM</button>
+            </div>
+
             <!-- Music Controls in Game -->
             <div class="game-music-controls">
                 <button class="music-control-btn" onclick="playPrevSong()">
@@ -93,12 +117,24 @@
                         <path fill="currentColor" d="M6 6h2v12H6zm3.5 6l8.5 6V6z" />
                     </svg>
                 </button>
-                <span class="now-playing">Music Playing</span>
+                <button class="music-control-btn play-pause-btn" id="game-play-pause" onclick="togglePlayPause()">
+                    <svg id="play-icon" viewBox="0 0 24 24" width="22" height="22">
+                        <path fill="currentColor" d="M8 5v14l11-7z" />
+                    </svg>
+                    <svg id="pause-icon" viewBox="0 0 24 24" width="22" height="22" style="display: none;">
+                        <path fill="currentColor" d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+                    </svg>
+                </button>
                 <button class="music-control-btn" onclick="playNextSong()">
                     <svg viewBox="0 0 24 24" width="20" height="20">
                         <path fill="currentColor" d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
                     </svg>
                 </button>
+            </div>
+
+            <div class="game-volume-container">
+                <span class="volume-label">Volume</span>
+                <input type="range" id="game-volume-control" min="0" max="100" value="50">
             </div>
         </div>
     </div>
