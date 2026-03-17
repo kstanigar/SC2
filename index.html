@@ -56,10 +56,6 @@
                     </svg>
                 </button>
 
-                <div class="volume-container">
-                    <input type="range" id="volume-control" min="0" max="100" value="50">
-                </div>
-
                 <button id="next-button" class="icon-btn">
                     <svg viewBox="0 0 24 24" width="24" height="24">
                         <path fill="currentColor" d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
@@ -70,11 +66,10 @@
 
         <div id="countdown" class="countdown"></div>
 
-        <p class="play-help">Tap "Listen in browser" if prompted</p>
-
         <button class="game-button" onclick="openGame()">Play a Game 🎮</button>
 
         <button class="clear-cache-btn" onclick="clearCache()">Clear Cache</button>
+        <p class="version-number">v5.0.0</p>
     </div>
 
     <!-- ==============================================================
@@ -105,9 +100,11 @@
 
             <!-- Genre Selection in Game -->
             <div class="game-genre-tabs">
-                <button class="game-genre-btn active" data-genre="lightJazz" onclick="switchGenreFromGame('lightJazz')">Jazz</button>
+                <button class="game-genre-btn active" data-genre="lightJazz"
+                    onclick="switchGenreFromGame('lightJazz')">Jazz</button>
                 <button class="game-genre-btn" data-genre="rnb" onclick="switchGenreFromGame('rnb')">R&B</button>
-                <button class="game-genre-btn" data-genre="electronic" onclick="switchGenreFromGame('electronic')">EDM</button>
+                <button class="game-genre-btn" data-genre="electronic"
+                    onclick="switchGenreFromGame('electronic')">EDM</button>
             </div>
 
             <!-- Music Controls in Game -->
@@ -130,11 +127,6 @@
                         <path fill="currentColor" d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
                     </svg>
                 </button>
-            </div>
-
-            <div class="game-volume-container">
-                <span class="volume-label">Volume</span>
-                <input type="range" id="game-volume-control" min="0" max="100" value="50">
             </div>
         </div>
     </div>

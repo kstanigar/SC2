@@ -14,7 +14,7 @@
  * - Glassmorphic design with animated backgrounds
  *
  * @author Keith Stanigar
- * @version 3.0
+ * @version 5.0.0
  */
 
 // ============================================================================
@@ -22,46 +22,9 @@
 // ============================================================================
 
 const musicLibrary = {
-    lightJazz: [
-        'https://soundcloud.com/cafemusicbgmofficial/regrowth-38',
-        'https://soundcloud.com/cafemusicbgmofficial/bright-garden-12',
-        'https://soundcloud.com/cafemusicbgmofficial/sugar-maroon-5-cafe-jazz-cover',
-        'https://soundcloud.com/cafemusicbgmofficial/riverside-ease-40',
-        'https://soundcloud.com/cafemusicbgmofficial/pink-petals-37',
-        'https://soundcloud.com/cafemusicbgmofficial/pastel-afternoon-34',
-        'https://soundcloud.com/cafemusicbgmofficial/window-canvas-53',
-        'https://soundcloud.com/cafemusicbgmofficial/spring-laughters-46',
-        'https://soundcloud.com/cafemusicbgmofficial/entire-day-46',
-        'https://soundcloud.com/cafemusicbgmofficial/happy-xmas-war-is-over-13',
-        'https://soundcloud.com/cafemusicbgmofficial/diamond-cut-36',
-        'https://soundcloud.com/cafemusicbgmofficial/kissaten-33',
-        'https://soundcloud.com/cafemusicbgmofficial/lets-start',
-        'https://soundcloud.com/cafemusicbgmofficial/stylish-year',
-        'https://soundcloud.com/cafemusicbgmofficial/o-come-all-ye-faithful-27',
-        'https://soundcloud.com/relaxcafemusic/early-summer',
-        'https://soundcloud.com/relaxcafemusic/cherry-on-top',
-        'https://soundcloud.com/cafemusicbgmofficial/jingle-bells-21'
-    ],
-    rnb: [
-        'https://soundcloud.com/levertofficial/levert-casanova',
-        'https://soundcloud.com/wrz7smvkpd0p/zombie-millimax',
-        'https://soundcloud.com/commodores-official/zoom-album-version',
-        'https://soundcloud.com/otisredding/ive-been-loving-you-too-long',
-        'https://soundcloud.com/janetjackson/come-back-to-me-album-version',
-        'https://soundcloud.com/dpwctqasgte6/b918fade-db3d-4f18-8fc5-be3c2181ad00'
-    ],
-    electronic: [
-        'https://soundcloud.com/matador_official/matador-femme-just-getting-started',
-        'https://soundcloud.com/tinlicker/never-let-me-go-1',
-        'https://soundcloud.com/kompakt/raxon-never-stops-2',
-        'https://soundcloud.com/eynka/the-way',
-        'https://soundcloud.com/flozbeats/overmono-everything-u-need-floz-edit',
-        'https://soundcloud.com/ellum/matteea-frames-1',
-        'https://soundcloud.com/maceoplex/mutant-romance-fakemaster1',
-        'https://soundcloud.com/thisneverhappenedlabel/lane-8-little-voices',
-        'https://soundcloud.com/disciplesldn/they-dont-know',
-        'https://soundcloud.com/telefon-tel-aviv/sound-in-a-dark-room',
-    ]
+    lightJazz: 'https://soundcloud.com/run-catch-kiss/sets/light-jazz',
+    rnb: 'https://soundcloud.com/run-catch-kiss/sets/r-b-playlist',
+    electronic: 'https://soundcloud.com/run-catch-kiss/sets/electronic'
 };
 
 // ============================================================================
@@ -71,38 +34,22 @@ const musicLibrary = {
 /** Current active genre */
 let currentGenre = 'lightJazz';
 
-/** Current track index within the active genre */
-let currentIndex = 0;
-
 /** SoundCloud widget instance */
 let widget;
-
-/** Flag to prevent autoplay on first load (browser restrictions) */
-let isFirstLoad = true;
-
-/** Tracks user's intended play/pause state */
-let shouldBePlaying = false;
-
-/** Current volume level (0-100) */
-let currentVolume = 50;
 
 /** Timestamp of last track change to prevent event double-firing */
 let lastTrackChangeTime = 0;
 
+/** Flag to track if user has interacted (enables autoplay on genre switch) */
+let hasUserInteracted = false;
+
 // Expose globally for cross-file access (simon.js)
 window.currentGenre = currentGenre;
-window.currentVolume = currentVolume;
 
 // ============================================================================
 // LOCALSTORAGE CONFIGURATION
 // ============================================================================
 // REUSABLE: These keys can be used in other projects for persistent storage
-
-/** Storage key for genre track positions */
-const STORAGE_KEY = 'musicPlayerGenrePositions';
-
-/** Storage key for volume preference */
-const VOLUME_STORAGE_KEY = 'musicPlayerVolume';
 
 /** Storage key for current genre selection */
 const GENRE_STORAGE_KEY = 'musicPlayerCurrentGenre';
@@ -112,91 +59,6 @@ const GENRE_STORAGE_KEY = 'musicPlayerCurrentGenre';
 // ============================================================================
 // REUSABLE: These functions provide a safe localStorage interface with error
 // handling and default values. Can be adapted for any key-value persistence.
-
-/**
- * Loads all saved genre positions from localStorage
- *
- * REUSABLE: Pattern for loading JSON objects from localStorage with fallback
- *
- * @returns {Object} Object mapping genre names to track indices
- * @example
- * { lightJazz: 5, rnb: 2, electronic: 7 }
- */
-function loadGenrePositions() {
-    try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-            return JSON.parse(saved);
-        }
-    } catch (e) {
-        console.warn('Failed to load genre positions:', e);
-    }
-    // Default positions
-    return { lightJazz: 0, rnb: 0, electronic: 0 };
-}
-
-/**
- * Saves the current track position for a specific genre
- *
- * REUSABLE: Pattern for updating nested localStorage objects
- *
- * @param {string} genre - Genre identifier (e.g., 'lightJazz', 'rnb')
- * @param {number} index - Track index to save
- */
-function saveGenrePosition(genre, index) {
-    try {
-        const positions = loadGenrePositions();
-        positions[genre] = index;
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(positions));
-    } catch (e) {
-        console.warn('Failed to save genre position:', e);
-    }
-}
-
-/**
- * Retrieves the saved track position for a specific genre
- *
- * @param {string} genre - Genre identifier
- * @returns {number} Saved track index, or 0 if none found
- */
-function getSavedPosition(genre) {
-    const positions = loadGenrePositions();
-    return positions[genre] || 0;
-}
-
-/**
- * Persists volume level to localStorage
- *
- * REUSABLE: Simple value persistence pattern
- *
- * @param {number} volume - Volume level (0-100)
- */
-function saveVolume(volume) {
-    try {
-        localStorage.setItem(VOLUME_STORAGE_KEY, volume);
-    } catch (e) {
-        console.warn('Failed to save volume:', e);
-    }
-}
-
-/**
- * Retrieves saved volume level from localStorage
- *
- * REUSABLE: Pattern for loading numeric values with defaults
- *
- * @returns {number} Saved volume (0-100), defaults to 50
- */
-function loadSavedVolume() {
-    try {
-        const saved = localStorage.getItem(VOLUME_STORAGE_KEY);
-        if (saved !== null) {
-            return parseInt(saved, 10);
-        }
-    } catch (e) {
-        console.warn('Failed to load volume:', e);
-    }
-    return 50; // Default volume
-}
 
 /**
  * Saves the current active genre to localStorage
@@ -257,25 +119,30 @@ const returnDate = new Date('2026-04-30'); // Set your return date here
 // ============================================================================
 
 /**
- * Initializes or reloads the SoundCloud widget with current track
+ * Initializes or reloads the SoundCloud widget with current genre playlist
  *
- * Creates a new iframe embed for SoundCloud, configures the widget API,
- * and sets up event handlers for playback control.
+ * Creates a new iframe embed for SoundCloud with the genre's playlist URL,
+ * configures the widget API, and sets up event handlers for playback control.
+ * SoundCloud handles auto-advance natively within playlists.
  *
+ * @param {boolean} autoplay - Whether to use widget's native auto_play parameter
  * @fires widget.bind - SC.Widget.Events.READY
  * @fires widget.bind - SC.Widget.Events.FINISH
  */
-function loadPlayer() {
-    const url = musicLibrary[currentGenre][currentIndex];
+function loadPlayer(autoplay = false) {
     const playerDiv = document.getElementById('player');
-
     playerDiv.innerHTML = '';
 
-    // Update these parameters
+    // Load the playlist for the current genre
+    const playlistUrl = musicLibrary[currentGenre];
+
+    // Use widget's native auto_play when user has interacted
+    const shouldAutoplay = autoplay && hasUserInteracted;
+
     const params = [
-        `url=${encodeURIComponent(url)}`,
-        'auto_play=false',
-        'show_artwork=false',      // Set to false to hide artwork
+        `url=${encodeURIComponent(playlistUrl)}`,
+        `auto_play=${shouldAutoplay}`,  // Let SoundCloud widget handle autoplay
+        'show_artwork=false',
         'show_playcount=false',
         'show_comments=false',
         'color=%232850ac',
@@ -284,7 +151,7 @@ function loadPlayer() {
 
     const iframe = document.createElement('iframe');
     iframe.width = '100%';
-    iframe.height = '120';        // Reduced height back to 120 (since no artwork is shown)
+    iframe.height = '120';
     iframe.scrolling = 'no';
     iframe.frameBorder = 'no';
     iframe.allow = 'autoplay';
@@ -294,26 +161,19 @@ function loadPlayer() {
     iframe.onload = () => {
         widget = SC.Widget(iframe);
         widget.bind(SC.Widget.Events.READY, () => {
-            widget.setVolume(currentVolume);
-            widget.bind(SC.Widget.Events.FINISH, () => {
-                // Auto-advance to next track and keep playing
-                shouldBePlaying = true;
-                changeToNextTrack();
-            });
+            // Update icon based on autoplay state
+            updatePlayPauseIcon(!shouldAutoplay);
 
-            // Only autoplay if user wants music playing
-            if (shouldBePlaying && !isFirstLoad) {
-                // Small delay to ensure widget is fully ready
-                setTimeout(() => {
-                    widget.play();
-                    updatePlayPauseIcon(false); // Update icon to pause
-                }, 100);
-            } else {
-                updatePlayPauseIcon(true); // Update icon to play
-            }
+            // SoundCloud widget handles auto-advance automatically for playlists
+            // Show love note occasionally when tracks finish
+            widget.bind(SC.Widget.Events.FINISH, () => {
+                // Show love note occasionally (30% chance)
+                if (Math.random() < 0.3) {
+                    showLoveNote();
+                }
+            });
         });
     };
-    updateSongIndexUI();
 }
 
 // ============================================================================
@@ -426,11 +286,9 @@ function updateClock() {
  * Switches the active music genre and updates all UI elements
  *
  * This function orchestrates genre switching by:
- * - Saving current track position
- * - Loading saved position for new genre
  * - Updating theme/background animations
  * - Syncing tab buttons in both player and game
- * - Triggering autoplay
+ * - Loading new playlist with native autoplay
  * - Displaying a love note
  *
  * @param {string} genre - Genre identifier ('lightJazz', 'rnb', 'electronic')
@@ -438,19 +296,12 @@ function updateClock() {
 function switchGenre(genre) {
     if (currentGenre === genre) return;
 
-    // Save current position before switching
-    saveGenrePosition(currentGenre, currentIndex);
+    // Mark that user has interacted
+    hasUserInteracted = true;
 
     currentGenre = genre;
     window.currentGenre = genre; // Update global reference
     saveCurrentGenre(genre); // Save to localStorage
-
-    // Load saved position for the new genre
-    currentIndex = getSavedPosition(genre);
-
-    // Genre switch is user interaction - enable autoplay
-    isFirstLoad = false;
-    shouldBePlaying = true; // User wants to hear the new genre
 
     // Update Theme Class for CSS animations
     document.body.className = `theme-${genre === 'lightJazz' ? 'jazz' : genre}`;
@@ -470,38 +321,32 @@ function switchGenre(genre) {
         btn.classList.toggle('active', btn.dataset.genre === genre);
     });
 
-    loadPlayer();
+    loadPlayer(true); // Use widget's native auto_play
+    updateSongIndexUI();
     showLoveNote(); // Show love note when switching genres
 }
 
 /**
- * Updates the song index display (e.g., "Jazz | Track 1 of 18")
+ * Updates the song index display with current genre
  *
- * @example
- * // Called after loadPlayer() to show current position
- * updateSongIndexUI(); // "R&B | Track 3 of 6"
+ * Shows genre name since SoundCloud widget manages track positions internally.
  */
 function updateSongIndexUI() {
     const songIndexDiv = document.getElementById('song-index');
     if (!songIndexDiv) return;
 
-    let displayLabel = 'Jazz';
-    if (currentGenre === 'rnb') displayLabel = 'R&B';
-    if (currentGenre === 'electronic') displayLabel = 'Electronic';
+    let displayLabel = 'Jazz Playlist';
+    if (currentGenre === 'rnb') displayLabel = 'R&B Playlist';
+    if (currentGenre === 'electronic') displayLabel = 'Electronic Playlist';
 
-    const currentTrackNumber = currentIndex + 1;
-    const totalTracks = musicLibrary[currentGenre].length;
-
-    songIndexDiv.textContent = `${displayLabel} | Track ${currentTrackNumber} of ${totalTracks}`;
+    songIndexDiv.textContent = displayLabel;
 }
 
 /**
  * Advances to the next track in the current genre playlist
  *
- * Wraps around to the beginning when reaching the end of the playlist.
- * Persists the new position and has a 30% chance to show a love note.
+ * Uses SoundCloud widget's native next() method to navigate within the playlist.
  * Includes debounce protection to prevent double-firing on mobile.
- * Preserves the current play/pause state.
  */
 function playNextSong() {
     // Prevent double-firing from touchend + click events on mobile
@@ -511,25 +356,13 @@ function playNextSong() {
     }
     lastTrackChangeTime = now;
 
-    // Check current playing state before changing track
-    if (widget) {
-        widget.isPaused((paused) => {
-            shouldBePlaying = !paused;
-            changeToNextTrack();
-        });
-    } else {
-        changeToNextTrack();
-    }
-}
+    if (!widget) return;
 
-/**
- * Internal helper to change to next track
- */
-function changeToNextTrack() {
-    currentIndex = (currentIndex + 1) % musicLibrary[currentGenre].length;
-    saveGenrePosition(currentGenre, currentIndex);
-    isFirstLoad = false;
-    loadPlayer();
+    hasUserInteracted = true; // Mark user interaction
+
+    // Use widget's native next() method
+    widget.next();
+
     // Show love note occasionally (30% chance)
     if (Math.random() < 0.3) {
         showLoveNote();
@@ -539,10 +372,8 @@ function changeToNextTrack() {
 /**
  * Returns to the previous track in the current genre playlist
  *
- * Wraps around to the end when at the beginning of the playlist.
- * Persists the new position and has a 30% chance to show a love note.
+ * Uses SoundCloud widget's native prev() method to navigate within the playlist.
  * Includes debounce protection to prevent double-firing on mobile.
- * Preserves the current play/pause state.
  */
 function playPrevSong() {
     // Prevent double-firing from touchend + click events on mobile
@@ -552,25 +383,13 @@ function playPrevSong() {
     }
     lastTrackChangeTime = now;
 
-    // Check current playing state before changing track
-    if (widget) {
-        widget.isPaused((paused) => {
-            shouldBePlaying = !paused;
-            changeToPrevTrack();
-        });
-    } else {
-        changeToPrevTrack();
-    }
-}
+    if (!widget) return;
 
-/**
- * Internal helper to change to previous track
- */
-function changeToPrevTrack() {
-    currentIndex = (currentIndex - 1 + musicLibrary[currentGenre].length) % musicLibrary[currentGenre].length;
-    saveGenrePosition(currentGenre, currentIndex);
-    isFirstLoad = false;
-    loadPlayer();
+    hasUserInteracted = true; // Mark user interaction
+
+    // Use widget's native prev() method
+    widget.prev();
+
     // Show love note occasionally (30% chance)
     if (Math.random() < 0.3) {
         showLoveNote();
@@ -593,79 +412,6 @@ prevBtn.addEventListener('click', (e) => {
 });
 
 // ============================================================================
-// VOLUME CONTROL
-// ============================================================================
-// REUSABLE: Pattern for syncing multiple UI controls to single state
-
-const volumeControl = document.getElementById('volume-control');
-
-/**
- * Updates volume across all interfaces and persists to storage
- *
- * REUSABLE: Pattern for synchronized state management across multiple UI elements
- *
- * This function demonstrates how to keep multiple UI controls (main player
- * slider and game slider) in sync with a single source of truth.
- *
- * @param {string|number} value - Volume level (0-100)
- *
- * @example
- * // Called from any volume slider
- * updateVolume(75); // Updates widget, both sliders, and localStorage
- */
-function updateVolume(value) {
-    currentVolume = value;
-    window.currentVolume = value; // Update global reference
-    if (widget && widget.setVolume) {
-        widget.setVolume(currentVolume);
-    }
-    saveVolume(currentVolume); // Save to localStorage
-
-    // Sync both volume sliders
-    const mainVolumeControl = document.getElementById('volume-control');
-    const gameVolumeControl = document.getElementById('game-volume-control');
-
-    if (mainVolumeControl) mainVolumeControl.value = currentVolume;
-    if (gameVolumeControl) gameVolumeControl.value = currentVolume;
-}
-
-// Handle both input and change events for better mobile support
-volumeControl.addEventListener('input', (e) => {
-    updateVolume(e.target.value);
-});
-
-volumeControl.addEventListener('change', (e) => {
-    updateVolume(e.target.value);
-});
-
-// Handle touch events specifically for mobile
-volumeControl.addEventListener('touchend', (e) => {
-    updateVolume(e.target.value);
-}, { passive: true });
-
-// Game volume control - initialize after DOM loads
-window.addEventListener('DOMContentLoaded', () => {
-    const gameVolumeControl = document.getElementById('game-volume-control');
-    if (gameVolumeControl) {
-        // Set initial value
-        gameVolumeControl.value = currentVolume;
-
-        // Handle events
-        gameVolumeControl.addEventListener('input', (e) => {
-            updateVolume(e.target.value);
-        });
-
-        gameVolumeControl.addEventListener('change', (e) => {
-            updateVolume(e.target.value);
-        });
-
-        gameVolumeControl.addEventListener('touchend', (e) => {
-            updateVolume(e.target.value);
-        }, { passive: true });
-    }
-});
-
-// ============================================================================
 // UTILITY FUNCTIONS
 // ============================================================================
 
@@ -682,20 +428,20 @@ function clearCache() {
 /**
  * Toggles playback state between play and pause
  *
- * Queries the SoundCloud widget for current state and toggles it,
- * then updates the UI icon to match and tracks user's play intention.
+ * Uses SoundCloud widget's native play/pause methods and updates UI icon.
+ * Marks user interaction flag for future autoplay capability.
  */
 function togglePlayPause() {
     if (!widget) return;
 
+    hasUserInteracted = true; // Mark user interaction
+
     widget.isPaused((paused) => {
         if (paused) {
             widget.play();
-            shouldBePlaying = true;
             updatePlayPauseIcon(false);
         } else {
             widget.pause();
-            shouldBePlaying = false;
             updatePlayPauseIcon(true);
         }
     });
@@ -762,17 +508,6 @@ window.onload = () => {
     currentGenre = loadSavedGenre();
     window.currentGenre = currentGenre;
 
-    // Load saved position for the current genre
-    currentIndex = getSavedPosition(currentGenre);
-
-    // Load saved volume
-    currentVolume = loadSavedVolume();
-    window.currentVolume = currentVolume; // Update global reference
-    const volumeControl = document.getElementById('volume-control');
-    if (volumeControl) {
-        volumeControl.value = currentVolume;
-    }
-
     // Update theme based on saved genre
     document.body.className = `theme-${currentGenre === 'lightJazz' ? 'jazz' : currentGenre}`;
 
@@ -791,6 +526,7 @@ window.onload = () => {
     });
 
     loadPlayer();
+    updateSongIndexUI();
     updateCountdown();
     updateClock();
     // Update countdown every hour
@@ -802,9 +538,14 @@ window.onload = () => {
     // Show love notes every 12 minutes (720000ms)
     setInterval(showLoveNote, 720000);
 
-    // Prevent double-tap zoom on iOS
+    // Prevent double-tap zoom on iOS (but allow slider interaction)
     let lastTouchEnd = 0;
     document.addEventListener('touchend', (e) => {
+        // Don't prevent default on input elements (sliders need touch events)
+        if (e.target.tagName === 'INPUT') {
+            return;
+        }
+
         const now = Date.now();
         if (now - lastTouchEnd <= 300) {
             e.preventDefault();

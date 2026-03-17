@@ -402,6 +402,13 @@ h1 {
     opacity: 1;
 }
 
+.version-number {
+    margin-top: 8px;
+    font-size: 11px;
+    opacity: 0.4;
+    color: white;
+}
+
 .game-button {
     display: block;
     width: 100%;
