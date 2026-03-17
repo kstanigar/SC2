@@ -14,7 +14,7 @@
  * - Glassmorphic design with animated backgrounds
  *
  * @author Keith Stanigar
- * @version 5.0.0
+ * @version 5.2.0
  */
 
 // ============================================================================
@@ -37,6 +37,9 @@ let currentGenre = 'lightJazz';
 /** SoundCloud widget instance */
 let widget;
 
+/** Current track index in the playlist (0-based) */
+let currentTrackIndex = 0;
+
 /** Timestamp of last track change to prevent event double-firing */
 let lastTrackChangeTime = 0;
 
@@ -53,6 +56,9 @@ window.currentGenre = currentGenre;
 
 /** Storage key for current genre selection */
 const GENRE_STORAGE_KEY = 'musicPlayerCurrentGenre';
+
+/** Storage key prefix for track positions (genre-specific) */
+const TRACK_POSITION_PREFIX = 'musicPlayerTrackPosition_';
 
 // ============================================================================
 // LOCALSTORAGE UTILITIES
@@ -90,6 +96,38 @@ function loadSavedGenre() {
     return 'lightJazz'; // Default genre
 }
 
+/**
+ * Saves the current track position for a specific genre
+ *
+ * @param {string} genre - Genre identifier
+ * @param {number} trackIndex - Track index in the playlist (0-based)
+ */
+function saveTrackPosition(genre, trackIndex) {
+    try {
+        localStorage.setItem(TRACK_POSITION_PREFIX + genre, trackIndex.toString());
+    } catch (e) {
+        console.warn('Failed to save track position:', e);
+    }
+}
+
+/**
+ * Loads the saved track position for a specific genre
+ *
+ * @param {string} genre - Genre identifier
+ * @returns {number} Saved track index, defaults to 0
+ */
+function loadTrackPosition(genre) {
+    try {
+        const saved = localStorage.getItem(TRACK_POSITION_PREFIX + genre);
+        if (saved !== null) {
+            return parseInt(saved, 10);
+        }
+    } catch (e) {
+        console.warn('Failed to load track position:', e);
+    }
+    return 0; // Default to first track
+}
+
 // Love Notes
 const loveNotes = [
     "Missing your smile right now... 💕",
@@ -99,7 +137,7 @@ const loveNotes = [
     "Counting down the days until I see you",
     "Distance means so little when you mean so much",
     "This song is for you, my love",
-    "Thinking of all our beautiful moments together, while going poo",
+    "Thinking of all our beautiful moments together, while going poo 💩",
     "You make every day brighter, even from afar",
     "My heart is wherever you are",
     "Soon we'll be dancing together again",
@@ -161,8 +199,32 @@ function loadPlayer(autoplay = false) {
     iframe.onload = () => {
         widget = SC.Widget(iframe);
         widget.bind(SC.Widget.Events.READY, () => {
+            // Load saved track position for this genre
+            const savedTrackIndex = loadTrackPosition(currentGenre);
+            currentTrackIndex = savedTrackIndex;
+
+            // Skip to the saved track if not the first one
+            if (savedTrackIndex > 0) {
+                widget.skip(savedTrackIndex);
+            }
+
             // Update icon based on autoplay state
             updatePlayPauseIcon(!shouldAutoplay);
+
+            // Sync play/pause icon when widget plays
+            widget.bind(SC.Widget.Events.PLAY, () => {
+                updatePlayPauseIcon(false); // Show pause icon (playing)
+
+                // Update current track index when playing
+                widget.getCurrentSoundIndex((index) => {
+                    currentTrackIndex = index;
+                });
+            });
+
+            // Sync play/pause icon when widget pauses
+            widget.bind(SC.Widget.Events.PAUSE, () => {
+                updatePlayPauseIcon(true); // Show play icon (paused)
+            });
 
             // SoundCloud widget handles auto-advance automatically for playlists
             // Show love note occasionally when tracks finish
@@ -171,6 +233,12 @@ function loadPlayer(autoplay = false) {
                 if (Math.random() < 0.3) {
                     showLoveNote();
                 }
+
+                // Save track position when track finishes (next track will start)
+                widget.getCurrentSoundIndex((index) => {
+                    currentTrackIndex = index;
+                    saveTrackPosition(currentGenre, index);
+                });
             });
         });
     };
@@ -287,7 +355,7 @@ function updateClock() {
  *
  * This function orchestrates genre switching by:
  * - Updating theme/background animations
- * - Syncing tab buttons in both player and game
+ * - Syncing tab buttons in main player
  * - Loading new playlist with native autoplay
  * - Displaying a love note
  *
@@ -298,6 +366,9 @@ function switchGenre(genre) {
 
     // Mark that user has interacted
     hasUserInteracted = true;
+
+    // Save current track position before switching
+    saveTrackPosition(currentGenre, currentTrackIndex);
 
     currentGenre = genre;
     window.currentGenre = genre; // Update global reference
@@ -314,11 +385,6 @@ function switchGenre(genre) {
             (genre === 'rnb' && text.includes('r&b')) ||
             (genre === 'electronic' && text.includes('edm'));
         btn.classList.toggle('active', isActive);
-    });
-
-    // Update game genre tabs if they exist
-    document.querySelectorAll('.game-genre-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.genre === genre);
     });
 
     loadPlayer(true); // Use widget's native auto_play
@@ -363,6 +429,14 @@ function playNextSong() {
     // Use widget's native next() method
     widget.next();
 
+    // Update and save track position after short delay
+    setTimeout(() => {
+        widget.getCurrentSoundIndex((index) => {
+            currentTrackIndex = index;
+            saveTrackPosition(currentGenre, index);
+        });
+    }, 500);
+
     // Show love note occasionally (30% chance)
     if (Math.random() < 0.3) {
         showLoveNote();
@@ -389,6 +463,14 @@ function playPrevSong() {
 
     // Use widget's native prev() method
     widget.prev();
+
+    // Update and save track position after short delay
+    setTimeout(() => {
+        widget.getCurrentSoundIndex((index) => {
+            currentTrackIndex = index;
+            saveTrackPosition(currentGenre, index);
+        });
+    }, 500);
 
     // Show love note occasionally (30% chance)
     if (Math.random() < 0.3) {
@@ -450,11 +532,26 @@ function togglePlayPause() {
 /**
  * Updates the play/pause button icon based on playback state
  *
- * REUSABLE: Pattern for toggling between two UI states
+ * Updates icons in both main player and game modal to stay in sync
  *
  * @param {boolean} isPaused - True if player is paused, false if playing
  */
 function updatePlayPauseIcon(isPaused) {
+    // Main player icons
+    const mainPlayIcon = document.getElementById('main-play-icon');
+    const mainPauseIcon = document.getElementById('main-pause-icon');
+
+    if (mainPlayIcon && mainPauseIcon) {
+        if (isPaused) {
+            mainPlayIcon.style.display = 'block';
+            mainPauseIcon.style.display = 'none';
+        } else {
+            mainPlayIcon.style.display = 'none';
+            mainPauseIcon.style.display = 'block';
+        }
+    }
+
+    // Game modal icons
     const playIcon = document.getElementById('play-icon');
     const pauseIcon = document.getElementById('pause-icon');
 
@@ -470,21 +567,26 @@ function updatePlayPauseIcon(isPaused) {
 }
 
 /**
- * Switches genre from the game modal interface
+ * Replays the current song from the beginning
  *
- * Updates the game's genre tab UI, then delegates to the main
- * switchGenre function for actual genre switching logic.
- *
- * @param {string} genre - Genre identifier to switch to
+ * Uses SoundCloud widget's seekTo method to restart the track at 0ms.
+ * Also ensures the track is playing after replay.
  */
-function switchGenreFromGame(genre) {
-    // Update game genre tabs
-    document.querySelectorAll('.game-genre-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.genre === genre);
-    });
+function replaySong() {
+    if (!widget) return;
 
-    // Call main genre switch function
-    switchGenre(genre);
+    hasUserInteracted = true; // Mark user interaction
+
+    // Seek to beginning (0 milliseconds)
+    widget.seekTo(0);
+
+    // Ensure it's playing
+    widget.isPaused((paused) => {
+        if (paused) {
+            widget.play();
+            updatePlayPauseIcon(false);
+        }
+    });
 }
 
 // ============================================================================
@@ -518,11 +620,6 @@ window.onload = () => {
             (currentGenre === 'rnb' && text.includes('r&b')) ||
             (currentGenre === 'electronic' && text.includes('edm'));
         btn.classList.toggle('active', isActive);
-    });
-
-    // Update game genre tabs
-    document.querySelectorAll('.game-genre-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.genre === currentGenre);
     });
 
     loadPlayer();
