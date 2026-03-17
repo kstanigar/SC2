@@ -83,6 +83,9 @@ let isFirstLoad = true;
 /** Current volume level (0-100) */
 let currentVolume = 50;
 
+/** Flag to prevent rapid track changes from double-firing events */
+let isChangingTrack = false;
+
 // Expose globally for cross-file access (simon.js)
 window.currentGenre = currentGenre;
 window.currentVolume = currentVolume;
@@ -487,8 +490,13 @@ function updateSongIndexUI() {
  *
  * Wraps around to the beginning when reaching the end of the playlist.
  * Persists the new position and has a 30% chance to show a love note.
+ * Includes debounce protection to prevent double-firing on mobile.
  */
 function playNextSong() {
+    // Prevent double-firing from touchend + click events on mobile
+    if (isChangingTrack) return;
+    isChangingTrack = true;
+
     currentIndex = (currentIndex + 1) % musicLibrary[currentGenre].length;
     saveGenrePosition(currentGenre, currentIndex); // Save new position
     isFirstLoad = false;
@@ -497,6 +505,11 @@ function playNextSong() {
     if (Math.random() < 0.3) {
         showLoveNote();
     }
+
+    // Reset flag after a brief delay
+    setTimeout(() => {
+        isChangingTrack = false;
+    }, 300);
 }
 
 /**
@@ -504,8 +517,13 @@ function playNextSong() {
  *
  * Wraps around to the end when at the beginning of the playlist.
  * Persists the new position and has a 30% chance to show a love note.
+ * Includes debounce protection to prevent double-firing on mobile.
  */
 function playPrevSong() {
+    // Prevent double-firing from touchend + click events on mobile
+    if (isChangingTrack) return;
+    isChangingTrack = true;
+
     currentIndex = (currentIndex - 1 + musicLibrary[currentGenre].length) % musicLibrary[currentGenre].length;
     saveGenrePosition(currentGenre, currentIndex); // Save new position
     isFirstLoad = false;
@@ -514,6 +532,11 @@ function playPrevSong() {
     if (Math.random() < 0.3) {
         showLoveNote();
     }
+
+    // Reset flag after a brief delay
+    setTimeout(() => {
+        isChangingTrack = false;
+    }, 300);
 }
 
 // Event Listeners
