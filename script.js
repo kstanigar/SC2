@@ -143,6 +143,7 @@ const loveNotes = [
     "Soon we'll be dancing together again",
     "Love you more than words can say",
     "You're my favorite thing!",
+    "You're my everything!",
     "I'm thinking of you right now",
     "I love my baby, I love my babyyyyyyyyy. I love, I love, I love, I love, I love my baby! Hey!",
     "Until we're together again, you're in my thoughts",
